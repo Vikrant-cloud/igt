@@ -13,6 +13,7 @@ const NotFound = lazy(() => import('./pages/notfound'));
 const ForgotPassword = lazy(() => import('./pages/forgotpassword'));
 const ResetPassword = lazy(() => import('./pages/resetPassword'));
 const Users = lazy(() => import('./pages/users'));
+const Content = lazy(() => import('./pages/content'));
 
 function App() {
   return (
@@ -50,6 +51,14 @@ function App() {
           element={
             <PrivateRoute>
               <Users />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/content"
+          element={
+            <PrivateRoute>
+              <Content />
             </PrivateRoute>
           }
         />

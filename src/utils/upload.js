@@ -4,12 +4,22 @@ import cloudinary from './cloudnary.js';
 
 const storage = new CloudinaryStorage({
     cloudinary,
-    params: {
-        folder: 'user_profiles',
-        allowed_formats: ['jpg', 'jpeg', 'png'],
-        transformation: [{ width: 500, height: 500, crop: 'limit' }],
+    params: async (req, file) => {
+        const isVideo = file.mimetype.startsWith('video');
+
+        return {
+            folder: 'user_profiles',
+            resource_type: isVideo ? 'video' : 'image',
+            allowed_formats: ['jpg', 'jpeg', 'png', 'mp4'],
+            ...(isVideo
+                ? {} // No transformation for video
+                : {
+                    transformation: [{ width: 500, height: 500, crop: 'limit' }],
+                }),
+        };
     },
 });
+
 
 const upload = multer({ storage });
 

@@ -9,6 +9,7 @@ import cors from 'cors';
 import connectDB from './src/config/db.js';
 import authRouter from './src/routes/auth.routes.js';
 import userRoutes from './src/routes/user.routes.js';
+import contentRoutes from './src/routes/content.routes.js';
 import upload from './src/routes/upload.route.js';
 import initSocket from './src/socket/socket.js';
 
@@ -34,6 +35,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRoutes);
 app.use('/api', upload);
+app.use('/api/content', contentRoutes);
 
 // Optional: Serve static uploads
 // app.use('/uploads', express.static(path.join(__dirname, './uploads')));

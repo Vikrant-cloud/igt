@@ -1,7 +1,7 @@
 import User from "../models/user.model.js"
 import jwt from 'jsonwebtoken';
 import transporter from "../utils/nodemailer.js";
-import { userSchema } from "../utils/userValidation.js";
+import { userSchema } from "../utils/validations.js";
 
 // genrate token
 const generateToken = (userId) => {
@@ -36,13 +36,7 @@ export const createUser = async (req, res) => {
     console.log(error, "error");
 
     if (error) {
-        console.log(error, "error");
         return res.status(400).json({ message: error.details[0].message });
-    }
-    console.log(error, "error");
-
-    if (error) {
-        return res.status(400).json({ message: error });
     }
     const userExist = await User.findOne({ email: req.body.email })
 
@@ -98,7 +92,6 @@ export const resetPassword = async (req, res) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded, "decoded");
         const user = await User.findById(decoded.id);
 
         if (!user) return res.status(404).json({ message: 'User not found' });

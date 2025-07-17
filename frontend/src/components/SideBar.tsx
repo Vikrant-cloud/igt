@@ -11,6 +11,9 @@ export default function SideBar() {
         <Link to={`/users`} className="flex items-center gap-3 hover:text-indigo-600">
           Users
         </Link>
+        <Link to={`/content`} className="flex items-center gap-3 hover:text-indigo-600">
+          Content
+        </Link>
         <Link to="/settings" className="flex items-center gap-3 hover:text-indigo-600">
           Settings
         </Link>

@@ -23,3 +23,8 @@ export const fetchUsers = async () => {
     const { data } = await api.get('/users');
     return data
 };
+
+export const getContentList = async () => {
+    const { data } = await api.get('/content');
+    return data
+};

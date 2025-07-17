@@ -25,7 +25,6 @@ function initSocket(server) {
                 });
 
                 const resData = await res.json();
-                console.log(resData.response);
                 socket.emit('receive_message', resData.response);
             } catch (error) {
                 console.error('Error fetching from LLaMA3 API:', error);
