@@ -3,8 +3,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import cors from 'cors';
-// import { fileURLToPath } from 'url';
-// import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import path from 'path';
 
 import connectDB from './src/config/db.js';
 import authRouter from './src/routes/auth.routes.js';
@@ -41,6 +41,15 @@ app.use('/api/content', contentRoutes);
 // app.use('/uploads', express.static(path.join(__dirname, './uploads')));
 
 initSocket(server);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, './frontend/dist')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './frontend/dist/index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
