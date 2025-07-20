@@ -4,8 +4,8 @@ import transporter from "../utils/nodemailer.js";
 import { userSchema } from "../utils/validations.js";
 
 // genrate token
-const generateToken = (userId) => {
-    return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: '1d' });
+const generateToken = (userId, userRole) => {
+    return jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, { expiresIn: '1d' });
 };
 
 // Login user flow
@@ -18,7 +18,7 @@ export const loginUser = async (req, res) => {
     }
 
     try {
-        const token = generateToken(userExist._id)
+        const token = generateToken(userExist._id, userExist.role);
         res.cookie('token', token, {
             httpOnly: false,
             secure: process.env.NODE_ENV === 'production', // 🔐 Only HTTPS in production
@@ -33,7 +33,6 @@ export const loginUser = async (req, res) => {
 
 export const createUser = async (req, res) => {
     const { error } = userSchema.validate(req.body);
-    console.log(error, "error");
 
     if (error) {
         return res.status(400).json({ message: error.details[0].message });
@@ -70,7 +69,7 @@ export const forgotPassword = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     // genrate token for reset password
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, user.role);
 
     const resetLink = `${process.env.CORS_ORIGIN}/reset-password/${token}`;
     try {

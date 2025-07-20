@@ -1,4 +1,5 @@
 import User from "../models/user.model.js"
+import Content from "../models/content.model.js";
 
 export const getUserProfile = async (req, res) => {
     try {
@@ -14,10 +15,14 @@ export const getUserProfile = async (req, res) => {
 
 export const editUser = async (req, res) => {
     const { id } = req.params;
-    const { name, email, role, isActive } = req.body;
-    const imageUrl = req.file.path;
+    let profilePicture;
+    if (req.file && req.file.path) {
+        profilePicture = req.file.path;
+        req.body = { ...req.body, profilePicture }
+    }
+
     try {
-        const user = await User.findByIdAndUpdate(id, { name, email, role, isActive }, { new: true });
+        const user = await User.findByIdAndUpdate(id, req.body, { new: true });
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -32,8 +37,12 @@ export const deleteUser = async (req, res) => {
 
     try {
         const user = await User.findByIdAndDelete(id);
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
+        }
+        if (user) {
+            await Content.deleteMany({ createdBy: user._id });
         }
         res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {

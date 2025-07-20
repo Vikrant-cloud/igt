@@ -7,12 +7,13 @@ import {
 } from '../controller/user.controller.js';
 
 import { verifyUser } from '../middleware/verifyUser.js';
+import upload from '../utils/upload.js';
 
 const router = express.Router();
 
 router.get('/profile', verifyUser, getUserProfile);
 router.get('/', verifyUser, usersList);
-router.post('/edit/:id', verifyUser, editUser);
-router.post('/delete/:id', verifyUser, deleteUser);
+router.put('/:id', verifyUser, upload.single('profilePicture'), editUser);
+router.delete('/:id', verifyUser, deleteUser);
 
 export default router;

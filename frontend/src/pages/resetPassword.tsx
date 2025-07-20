@@ -17,7 +17,6 @@ export default function ResetPassword() {
         formState: { errors },
     } = useForm<Inputs>()
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
-        console.log(data);
         api.post('/auth/reset-password', { token: token, newPassword: data.password })
             .then(response => {
                 console.log("Password reset link sent to email:", response.data);

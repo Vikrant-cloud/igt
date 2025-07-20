@@ -17,19 +17,14 @@ export default function Profile() {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 
         const file: any = e.target.files?.[0];
-        console.log(file, "kkkk");
 
         if (file) {
             setPreview(URL.createObjectURL(file));
         }
-        console.log(file, "file");
 
         const formData = new FormData();
         formData.append("image", file); // image is an array of files
 
-        // You can also append other fields if needed:
-        // formData.append("title", data.title);
-        console.log(formData, "formData");
 
         // Send to backend
         api.post('/upload', formData, {
