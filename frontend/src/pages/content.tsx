@@ -41,7 +41,7 @@ const ContentPage: React.FC = () => {
     const page = 1;
     const limit = 10;
 
-    const { data, isLoading, isError, error, refetch } = useReactQuery(
+    const { data, refetch } = useReactQuery(
         ['content', page, limit],
         () => getContentList({ queryKey: ['content', page, limit] }),
     );

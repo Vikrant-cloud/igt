@@ -13,13 +13,13 @@ const Chat = () => {
         return () => { socket.off('receive_message'); }; // cleanup
     }, []);
 
-    const sendMessage = () => {
-        if (message.trim()) {
-            socket.emit('send_message', message);
-            setChat((prev) => [...prev, { text: message, from: 'me' }]);
-            setMessage('');
-        }
-    };
+    // const sendMessage = () => {
+    //     if (message.trim()) {
+    //         socket.emit('send_message', message);
+    //         setChat((prev) => [...prev, { text: message, from: 'me' }]);
+    //         setMessage('');
+    //     }
+    // };
 
     return (
         <div className="p-4">
