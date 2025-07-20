@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import socket from '../utils/socket';
 
 const Chat = () => {
-    const [message, setMessage] = useState('');
+    // const [message, setMessage] = useState('');
     const [chat, setChat] = useState<{ text: string; from: string }[]>([]);
 
     useEffect(() => {
