@@ -10,7 +10,7 @@ import connectDB from './src/config/db.js';
 import authRouter from './src/routes/auth.routes.js';
 import userRoutes from './src/routes/user.routes.js';
 import contentRoutes from './src/routes/content.routes.js';
-import upload from './src/routes/upload.route.js';
+// import upload from './src/routes/upload.route.js';
 import initSocket from './src/socket/socket.js';
 
 dotenv.config();
@@ -21,14 +21,6 @@ const server = http.createServer(app);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-
-
-app.use(express.static(path.join(__dirname, './frontend/dist')));
-
-app.get("/*splat", (req, res) => {
-    return res.sendFile(path.join(__dirname, './frontend/dist/index.html'));
-});
 
 // Middleware
 app.use(express.json());
@@ -46,6 +38,12 @@ app.use('/api/content', contentRoutes);
 
 // Optional: Serve static uploads
 // app.use('/uploads', express.static(path.join(__dirname, './uploads')));
+
+app.use(express.static(path.join(__dirname, './frontend/dist')));
+
+app.get("/*splat", (req, res) => {
+    return res.sendFile(path.join(__dirname, './frontend/dist/index.html'));
+});
 
 initSocket(server);
 
