@@ -71,7 +71,7 @@ export default function Users() {
     const handleDelete = async (userId: string) => {
         console.log('Delete user:', userId);
         await api.delete(`/users/${userId}`)
-        toast.success("User deleted successfully"); 
+        toast.success("User deleted successfully");
         await refetch(); // Refetch users after deletion
     };
 

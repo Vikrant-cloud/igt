@@ -7,7 +7,7 @@ const AuthLayout = ({ children, type }: { children: ReactNode, type: string }) =
         <div className="sm:mx-auto sm:w-full">
           <img
             alt="Company logo"
-            src="\src\assets\images\logo.png"
+            src="/images/logo.png"
             className="mx-auto h-32 w-auto"
           />
           <h1 className="mt-1 text-center text-3xl/9 font-bold tracking-tight text-white">
