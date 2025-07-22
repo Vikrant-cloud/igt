@@ -19,14 +19,21 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// // For __dirname in ES Modules
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+
+app.use(express.static(path.join(__dirname, './frontend/dist')));
+
+app.get("/*splat", (req, res) => {
+    return res.sendFile(path.join(__dirname, './frontend/dist/index.html'));
+});
 
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: "*",
     credentials: true
 }));
 app.use(cookieParser());
@@ -34,22 +41,13 @@ app.use(cookieParser());
 // Routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRoutes);
-app.use('/api', upload);
+// app.use('/api', upload);
 app.use('/api/content', contentRoutes);
 
 // Optional: Serve static uploads
 // app.use('/uploads', express.static(path.join(__dirname, './uploads')));
 
 initSocket(server);
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-app.use(express.static(path.join(__dirname, './frontend/dist')));
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, './frontend/dist/index.html'));
-});
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
