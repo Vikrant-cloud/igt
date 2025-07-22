@@ -12,6 +12,7 @@ import userRoutes from './src/routes/user.routes.js';
 import contentRoutes from './src/routes/content.routes.js';
 // import upload from './src/routes/upload.route.js';
 import initSocket from './src/socket/socket.js';
+import paymentRoutes from './src/routes/payment.routes.js';
 
 dotenv.config();
 connectDB();
@@ -35,6 +36,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', userRoutes);
 // app.use('/api', upload);
 app.use('/api/content', contentRoutes);
+app.use("/api/payment", paymentRoutes);
 
 // Optional: Serve static uploads
 // app.use('/uploads', express.static(path.join(__dirname, './uploads')));

@@ -14,6 +14,7 @@ const ForgotPassword = lazy(() => import('@/pages/forgotpassword'));
 const ResetPassword = lazy(() => import('@/pages/resetPassword'));
 const Users = lazy(() => import('@/pages/users'));
 const Content = lazy(() => import('@/pages/content'));
+const Settings = lazy(() => import('@/pages/settings'));
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
           element={
             <PrivateRoute>
               <Content />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <PrivateRoute>
+              <Settings />
             </PrivateRoute>
           }
         />
