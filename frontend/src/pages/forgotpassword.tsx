@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AuthLayout from "@/components/Layouts/AuthLayout";
-import { set, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import api from "@/utils/axios";
 import { toast } from "react-toastify";
