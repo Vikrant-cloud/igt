@@ -1,7 +1,7 @@
-import AuthLayout from "../components/Layouts/AuthLayout";
+import AuthLayout from "@/components/Layouts/AuthLayout";
 import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
-import api from "../utils/axios";
+import api from "@/utils/axios";
 import { useParams, useNavigate } from 'react-router';
 
 type Inputs = {

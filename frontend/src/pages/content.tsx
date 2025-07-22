@@ -3,11 +3,11 @@ import { useForm, } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { Dialog } from '@headlessui/react';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import Layout from '../components/Layouts/Layout';
-import api from '../utils/axios';
-import { useAuth } from '../hooks/useAuth';
-import { useReactQuery } from '../utils/useReactQuery';
-import { getContentList } from '../api/auth';
+import Layout from '@/components/Layouts/Layout';
+import api from '@/utils/axios';
+import { useAuth } from '@/hooks/useAuth';
+import { useReactQuery } from '@/utils/useReactQuery';
+import { getContentList } from '@/api/auth';
 import { toast } from 'react-toastify';
 
 type createdByUser = {

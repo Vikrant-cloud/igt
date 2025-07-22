@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import { Link, useNavigate } from 'react-router'
-import AuthLayout from "../components/Layouts/AuthLayout";
-import { createUser } from "../api/auth";
-import { useAuth } from "../hooks/useAuth";
+import AuthLayout from "@/components/Layouts/AuthLayout";
+import { createUser } from "@/api/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 
 type Inputs = {

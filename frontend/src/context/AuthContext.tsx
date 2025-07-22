@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { fetchCurrentUser, loginUser, logoutUser } from '../api/auth';
+import { fetchCurrentUser, loginUser, logoutUser } from '@/api/auth';
 import { toast } from 'react-toastify';
 
 export interface User {

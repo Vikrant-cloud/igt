@@ -1,19 +1,19 @@
 
 import { lazy } from 'react';
-import './App.css';
+import '@/App.css';
 import { BrowserRouter, Route, Routes } from 'react-router';
-import PrivateRoute from './context/PrivateRoutes';
-import PublicRoute from './context/PublicRoutes';
-const Home = lazy(() => import('./pages/home'));
-const About = lazy(() => import('./pages/about'));
-const Login = lazy(() => import('./pages/login'));
-const Signup = lazy(() => import('./pages/signup'));
-const Profile = lazy(() => import('./pages/profile'));
-const NotFound = lazy(() => import('./pages/notfound'));
-const ForgotPassword = lazy(() => import('./pages/forgotpassword'));
-const ResetPassword = lazy(() => import('./pages/resetPassword'));
-const Users = lazy(() => import('./pages/users'));
-const Content = lazy(() => import('./pages/content'));
+import PrivateRoute from '@/context/PrivateRoutes';
+import PublicRoute from '@/context/PublicRoutes';
+const Home = lazy(() => import('@/pages/home'));
+const About = lazy(() => import('@/pages/about'));
+const Login = lazy(() => import('@/pages/login'));
+const Signup = lazy(() => import('@/pages/signup'));
+const Profile = lazy(() => import('@/pages/profile'));
+const NotFound = lazy(() => import('@/pages/notfound'));
+const ForgotPassword = lazy(() => import('@/pages/forgotpassword'));
+const ResetPassword = lazy(() => import('@/pages/resetPassword'));
+const Users = lazy(() => import('@/pages/users'));
+const Content = lazy(() => import('@/pages/content'));
 
 function App() {
   return (

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import Layout from "../components/Layouts/Layout";
+import Layout from "@/components/Layouts/Layout";
 
 const About = () => {
   return (

@@ -1,11 +1,11 @@
 import { StrictMode, Suspense } from 'react'
 import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import '@/index.css'
+import App from '@/App.tsx'
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { AuthProvider } from './context/AuthContext.tsx';
+import { AuthProvider } from '@/context/AuthContext.tsx';
 import { ToastContainer } from 'react-toastify';
-import Loading from './components/Loading.tsx';
+import Loading from '@/components/Loading.tsx';
 
 const queryClient = new QueryClient();
 

@@ -1,6 +1,6 @@
-import { useAuth } from '../hooks/useAuth';
-import Layout from '../components/Layouts/Layout';
-import Chat from '../components/Chat';
+import { useAuth } from '@/hooks/useAuth';
+import Layout from '@/components/Layouts/Layout';
+import Chat from '@/components/Chat';
 
 export default function Home() {
     const { user } = useAuth();

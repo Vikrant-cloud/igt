@@ -25,7 +25,7 @@ const __dirname = path.dirname(__filename);
 // Middleware
 app.use(express.json());
 app.use(cors({
-    origin: "*",
+    origin: process.env.CORS_ORIGIN || '*',
     credentials: true
 }));
 app.use(cookieParser());

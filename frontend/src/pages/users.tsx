@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
-import { fetchUsers } from "../api/auth";
-import Layout from "../components/Layouts/Layout";
-import { useReactQuery } from "../utils/useReactQuery";
+import { fetchUsers } from "@/api/auth";
+import Layout from "@/components/Layouts/Layout";
+import { useReactQuery } from "@/utils/useReactQuery";
 import { useForm, Controller } from "react-hook-form";
 import React from "react";
-import api from "../utils/axios";
+import api from "@/utils/axios";
 import { toast } from "react-toastify";
+import Loading from "@/components/Loading";
 
 interface User {
     _id: string;
@@ -106,7 +107,7 @@ export default function Users() {
         }
     };
 
-    if (isLoading) return <p>Loading...</p>;
+    if (isLoading) return <Loading />;
     if (isError) return <p>Error: {error.message}</p>;
 
     return (

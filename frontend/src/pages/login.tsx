@@ -2,11 +2,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import { Link } from 'react-router';
-import AuthLayout from "../components/Layouts/AuthLayout";
+import AuthLayout from "@/components/Layouts/AuthLayout";
 import { useNavigate } from "react-router";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "@/hooks/useAuth";
 import clsx from 'clsx';
-import LoadingSpinner from "../components/LoadingSpinner";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { toast } from "react-toastify";
 
 type Inputs = {

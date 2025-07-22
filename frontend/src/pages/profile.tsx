@@ -1,10 +1,10 @@
 import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChevronDownIcon } from '@heroicons/react/16/solid'
-import Layout from '../components/Layouts/Layout'
+import Layout from '@/components/Layouts/Layout'
 import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import { useState } from 'react'
-import api from '../utils/axios'
+import api from '@/utils/axios'
 
 type Inputs = {
     name: string
