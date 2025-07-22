@@ -99,7 +99,7 @@ const Login = () => {
                   loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-red-600'
                 )}
               >
-                Sign in
+                {loading ? <LoadingSpinner /> : "Sign In"}
               </button>
 
               <p className="text-center text-sm text-gray-500">
@@ -108,7 +108,7 @@ const Login = () => {
                   to="/signup"
                   className="font-semibold text-blue-700 hover:text-blue-500"
                 >
-                  {loading ? <LoadingSpinner /> : "Signup"}
+                  Signup
                 </Link>
               </p>
             </form>

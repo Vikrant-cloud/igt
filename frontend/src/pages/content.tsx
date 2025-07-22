@@ -23,7 +23,7 @@ type FormValues = {
     createdBy: string | createdByUser
 };
 
-type Content = {
+export type Content = {
     _id: string;
     title: string;
     subject: string;

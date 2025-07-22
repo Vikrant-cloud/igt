@@ -1,25 +1,35 @@
+import { useState } from "react";
 import AuthLayout from "@/components/Layouts/AuthLayout";
-import { useForm } from "react-hook-form"
+import { set, useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import api from "@/utils/axios";
+import { toast } from "react-toastify";
+import LoadingSpinner from "@/components/LoadingSpinner";
+import clsx from "clsx";
 
 type Inputs = {
     email: string
 }
 
 export default function ForgotPassword() {
+    const [loading, setLoading] = useState(false);
     const {
         register,
         handleSubmit,
         formState: { errors },
     } = useForm<Inputs>()
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
+        setLoading(true);
         api.post('/auth/forgot-password', { email: data.email })
             .then(response => {
+                setLoading(false);
                 console.log("Password reset link sent to email:", response.data);
+                toast.success("Password reset link sent to your email.");
             })
             .catch(error => {
+                setLoading(false);
                 console.error("Error sending password reset link:", error);
+                toast.error("Failed to send password reset link. Please try again.");
             });
     }
 
@@ -39,10 +49,12 @@ export default function ForgotPassword() {
                             <span className="text-red-500 text-sm">Email is required</span>
                         )}
                         <button
-                            type="submit"
-                            className="w-full bg-red-500 text-white py-3 rounded-full font-semibold tracking-widest hover:bg-red-600 transition"
-                        >
-                            Send Link
+                            disabled={loading}
+                            className={clsx(
+                                'w-full bg-red-500 text-white py-3 rounded-full font-semibold tracking-widest transition',
+                                loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-red-600'
+                            )}>
+                            {loading ? <LoadingSpinner /> : "Send Link"}
                         </button>
                     </form>
                 </div>

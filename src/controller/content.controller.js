@@ -109,3 +109,35 @@ export const deleteContent = async (req, res) => {
         res.status(500).json({ message: 'Error deleting content', error });
     }
 };
+
+export const homeContentList = async (req, res) => {
+    try {
+        const content = await Content.aggregate([
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'createdBy',
+                    foreignField: '_id',
+                    as: 'createdBy'
+                }
+            },
+            { $unwind: '$createdBy' },
+            {
+                $project: {
+                    title: 1,
+                    description: 1,
+                    media: 1,
+                    createdAt: 1,
+                    'createdBy.name': 1
+                }
+            },
+            { $sort: { createdAt: -1 } }, // newest first
+            { $limit: 10 } // limit to 10 items
+        ]);
+
+        res.status(200).json({ contents: content });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'Error fetching home content', error });
+    }
+}
