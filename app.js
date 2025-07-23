@@ -24,6 +24,9 @@ const server = http.createServer(app);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoute);
+
+
 // Middleware
 app.use(express.json());
 app.use(cors({
@@ -38,7 +41,6 @@ app.use('/api/users', userRoutes);
 // app.use('/api', upload);
 app.use('/api/content', contentRoutes);
 app.use("/api/subscription", paymentRoutes);
-app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoute);
 
 
 // Optional: Serve static uploads
