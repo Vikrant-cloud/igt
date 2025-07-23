@@ -1,6 +1,7 @@
 import Layout from '@/components/Layouts/Layout';
 import { useAuth } from '@/hooks/useAuth';
 import api from '@/utils/axios';
+import clsx from 'clsx';
 
 export default function Home() {
     const { user } = useAuth()
@@ -21,9 +22,13 @@ export default function Home() {
                 <div className="mt-6">
                     <button
                         onClick={handleSubscribe}
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        disabled={user?.subscriptionStatus === 'active'}
+                        className={clsx(
+                            'w-full bg-red-500 text-white py-3 rounded-full font-semibold tracking-widest transition',
+                            user?.subscriptionStatus === "active" ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-red-600'
+                        )}
                     >
-                        Subscribe Now
+                        {user?.subscriptionStatus === "active" ? "Subscribed" : "Subascribe Now"}
                     </button>
                 </div>
             </div>
