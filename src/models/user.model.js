@@ -49,6 +49,9 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    stripeCustomerId: String,
+    subscriptionStatus: String,
+    currentPeriodEnd: Date,
 }, { timestamps: true });
 
 // Hash password before saving

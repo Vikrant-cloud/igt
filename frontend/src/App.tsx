@@ -4,6 +4,8 @@ import '@/App.css';
 import { BrowserRouter, Route, Routes } from 'react-router';
 import PrivateRoute from '@/context/PrivateRoutes';
 import PublicRoute from '@/context/PublicRoutes';
+import Success from '@/pages/success';
+import Cancel from '@/pages/cancel';
 const Home = lazy(() => import('@/pages/home'));
 const About = lazy(() => import('@/pages/about'));
 const Login = lazy(() => import('@/pages/login'));
@@ -14,7 +16,7 @@ const ForgotPassword = lazy(() => import('@/pages/forgotpassword'));
 const ResetPassword = lazy(() => import('@/pages/resetPassword'));
 const Users = lazy(() => import('@/pages/users'));
 const Content = lazy(() => import('@/pages/content'));
-const Settings = lazy(() => import('@/pages/settings'));
+const Subscription = lazy(() => import('@/pages/subscription'));
 
 function App() {
   return (
@@ -64,10 +66,26 @@ function App() {
           }
         />
         <Route
-          path="/settings"
+          path="/subscription"
           element={
             <PrivateRoute>
-              <Settings />
+              <Subscription />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/success"
+          element={
+            <PrivateRoute>
+              <Success />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/cancel"
+          element={
+            <PrivateRoute>
+              <Cancel />
             </PrivateRoute>
           }
         />

@@ -19,8 +19,8 @@ export default function SideBar() {
         <Link to={`/content`} className="flex items-center gap-3 hover:text-indigo-600">
           Content
         </Link>
-        <Link to="/settings" className="flex items-center gap-3 hover:text-indigo-600">
-          Settings
+        <Link to="/subscription" className="flex items-center gap-3 hover:text-indigo-600">
+          Subscription
         </Link>
       </nav>
     </aside>
