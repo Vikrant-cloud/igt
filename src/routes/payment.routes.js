@@ -13,6 +13,9 @@ router.post('/create-checkout-session', async (req, res) => {
         const customer = await stripe.customers.create({ email });
         user = await User.create({ email, stripeCustomerId: customer.id });
     }
+    const customer = await stripe.customers.create({ email });
+    user.stripeCustomerId = customer.id;
+    await user.save();
 
     const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
