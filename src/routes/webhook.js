@@ -8,8 +8,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 router.post('/', async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
-    console.log("Received webhook event:", req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-
 
     try {
         event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
