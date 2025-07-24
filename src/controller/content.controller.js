@@ -1,44 +1,48 @@
-import Content from '../models/content.model.js'
-import { contentSchema } from '../utils/validations.js'
+import asyncHandler from 'express-async-handler';
 import mongoose from 'mongoose';
+import Content from '../models/content.model.js';
+import { contentSchema } from '../utils/validations.js';
 
-export const createContent = async (req, res) => {
-    const media = req.file.path
+// @desc   Create new content
+// @route  POST /api/content
+// @access Private
+export const createContent = asyncHandler(async (req, res) => {
+    const media = req.file?.path;
+
     const { error } = contentSchema.validate({ ...req.body, media });
     if (error) {
-        return res.status(400).json({ message: error.details[0].message });
+        res.status(400);
+        throw new Error(error.details[0].message);
     }
-    try {
-        const content = await Content.create({ ...req.body, media })
-        return res.status(201).json({ message: 'Content created successfully', content });
-    } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-}
 
-export const contentList = async (req, res) => {
-    try {
-        const page = parseInt(req.query.page) || 1; // default to page 1
-        const limit = parseInt(req.query.limit) || 10; // default to 10 per page
-        const skip = (page - 1) * limit;
+    const content = await Content.create({ ...req.body, media, createdBy: req.user.id });
 
-        // Total count without pagination (for frontend to calculate total pages)
-        const totalCount = await Content.countDocuments();
+    res.status(201).json({ message: 'Content created successfully', content });
+});
 
-        const matchStage = req.user.role === 'user'
+// @desc   Get content list with pagination (user/admin view)
+// @route  GET /api/content
+// @access Private
+export const contentList = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const matchStage =
+        req.user.role === 'user'
             ? { $match: { createdBy: new mongoose.Types.ObjectId(req.user.id) } }
             : { $match: {} };
 
-
-        const content = await Content.aggregate([
+    const [contents, total] = await Promise.all([
+        Content.aggregate([
             matchStage,
             {
                 $lookup: {
                     from: 'users',
                     localField: 'createdBy',
                     foreignField: '_id',
-                    as: 'createdBy'
-                }
+                    as: 'createdBy',
+                },
             },
             { $unwind: '$createdBy' },
             {
@@ -47,79 +51,87 @@ export const contentList = async (req, res) => {
                     description: 1,
                     media: 1,
                     createdAt: 1,
-                    'createdBy.name': 1
-                }
+                    'createdBy.name': 1,
+                },
             },
-            { $sort: { createdAt: -1 } }, // newest first
+            { $sort: { createdAt: -1 } },
             { $skip: skip },
-            { $limit: limit }
-        ]);
+            { $limit: limit },
+        ]),
+        Content.countDocuments(req.user.role === 'user' ? { createdBy: req.user.id } : {}),
+    ]);
 
-        res.status(200).json({
-            contents: content,
-            pagination: {
-                total: totalCount,
-                page,
-                limit,
-                totalPages: Math.ceil(totalCount / limit)
-            }
-        });
-    } catch (error) {
-        console.log(error);
+    res.status(200).json({
+        contents,
+        pagination: {
+            total,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            pageSize: limit,
+        },
+    });
+});
 
-        res.status(500).json({ message: 'Error fetching content with user info', error });
-    }
-};
-
-
-export const contentUpdate = async (req, res) => {
+// @desc   Update content
+// @route  PUT /api/content/:id
+// @access Private
+export const contentUpdate = asyncHandler(async (req, res) => {
     const { id } = req.params;
-    let media
+
     if (req.file) {
-        media = req.file.path
-        req.body = { ...req.body, media }
+        req.body.media = req.file.path;
     }
 
     const { error } = contentSchema.validate(req.body);
-
     if (error) {
-        return res.status(400).json({ message: error.details[0].message });
+        res.status(400);
+        throw new Error(error.details[0].message);
     }
-    try {
-        const content = await Content.findByIdAndUpdate(id, req.body, { new: true });
-        if (!content) {
-            return res.status(404).json({ message: 'Content not found' });
-        }
-        return res.status(200).json({ message: 'Content updated successfully', content });
-    } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
+
+    const content = await Content.findByIdAndUpdate(id, req.body, {
+        new: true,
+        runValidators: true,
+    });
+
+    if (!content) {
+        res.status(404);
+        throw new Error('Content not found');
     }
-}
 
-export const deleteContent = async (req, res) => {
-    try {
-        const content = await Content.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Content updated successfully', content });
+});
 
-        if (!content) {
-            return res.status(404).json({ message: 'Content not found' });
-        }
+// @desc   Delete content
+// @route  DELETE /api/content/:id
+// @access Private
+export const deleteContent = asyncHandler(async (req, res) => {
+    const content = await Content.findByIdAndDelete(req.params.id);
 
-        res.status(200).json({ message: 'Content deleted successfully', content });
-    } catch (error) {
-        res.status(500).json({ message: 'Error deleting content', error });
+    if (!content) {
+        res.status(404);
+        throw new Error('Content not found');
     }
-};
 
-export const homeContentList = async (req, res) => {
-    try {
-        const content = await Content.aggregate([
+    res.status(200).json({ message: 'Content deleted successfully', content });
+});
+
+// @desc   Get recent content for home page with pagination
+// @route  GET /api/content/home?page=1&limit=10
+// @access Public
+export const homeContentList = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [content, total] = await Promise.all([
+        Content.aggregate([
             {
                 $lookup: {
                     from: 'users',
                     localField: 'createdBy',
                     foreignField: '_id',
-                    as: 'createdBy'
-                }
+                    as: 'createdBy',
+                },
             },
             { $unwind: '$createdBy' },
             {
@@ -128,16 +140,23 @@ export const homeContentList = async (req, res) => {
                     description: 1,
                     media: 1,
                     createdAt: 1,
-                    'createdBy.name': 1
-                }
+                    'createdBy.name': 1,
+                },
             },
-            { $sort: { createdAt: -1 } }, // newest first
-            { $limit: 10 } // limit to 10 items
-        ]);
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+        ]),
+        Content.countDocuments(),
+    ]);
 
-        res.status(200).json({ contents: content });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: 'Error fetching home content', error });
-    }
-}
+    res.status(200).json({
+        contents: content,
+        pagination: {
+            total,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            pageSize: limit,
+        },
+    });
+});

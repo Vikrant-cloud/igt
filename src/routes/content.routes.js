@@ -1,5 +1,5 @@
 import express from 'express';
-import { verifyUser } from '../middleware/verifyUser.js';
+import { verifyUser } from '../middlewares/verifyUser.js';
 import upload from '../utils/upload.js';
 import { contentList, createContent, contentUpdate, deleteContent, homeContentList } from '../controller/content.controller.js';
 

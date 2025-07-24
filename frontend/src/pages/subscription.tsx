@@ -28,8 +28,12 @@ export default function Home() {
                             user?.subscriptionStatus === "active" ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-red-600'
                         )}
                     >
-                        {user?.subscriptionStatus === "active" ? "Subscribed" : "Subascribe Now"}
+                        {user?.subscriptionStatus === "active" ? "Subscribed" : "Subscribe Now"}
                     </button>
+                    {user?.subscriptionStatus === "active" && user?.currentPeriodEnd && (
+                        <p className="mt-2 text-green-500">You are currently subscription ends {new Date(user?.currentPeriodEnd).toLocaleString()}</p>
+                    )}
+
                 </div>
             </div>
         </Layout>

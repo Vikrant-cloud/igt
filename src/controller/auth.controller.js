@@ -1,108 +1,118 @@
-import User from "../models/user.model.js"
+import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
-import transporter from "../utils/nodemailer.js";
-import { userSchema } from "../utils/validations.js";
+import User from '../models/user.model.js';
+import transporter from '../utils/nodemailer.js';
 
-// genrate token
+// 🔐 Generate JWT token
 const generateToken = (userId, userRole) => {
-    return jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    return jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, {
+        expiresIn: '1d',
+    });
 };
 
-// Login user flow
-export const loginUser = async (req, res) => {
-    const userExist = await User.findOne({ email: req.body.email, role: req.body.role }).select('+password')
+// 🟢 Login User
+export const loginUser = asyncHandler(async (req, res) => {
+    const userExist = await User.findOne({
+        email: req.body.email,
+        role: req.body.role,
+    }).select('+password');
 
-    // check existed user and compare password with db
     if (!userExist || !(await userExist.comparePassword(req.body.password))) {
-        return res.status(200).json({ message: 'Wrong credentials' });
+        res.status(401); // Unauthorized
+        throw new Error('Invalid credentials');
     }
 
-    try {
-        const token = generateToken(userExist._id, userExist.role);
-        res.cookie('token', token, {
-            httpOnly: false,
-            secure: process.env.NODE_ENV === 'production', // 🔐 Only HTTPS in production
-            sameSite: 'Lax',
-            maxAge: 24 * 60 * 60 * 1000 // 1 day
-        });
-        res.status(200).json({ message: 'User logged in successfully', userExist, token });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-}
+    const token = generateToken(userExist._id, userExist.role);
 
-export const createUser = async (req, res) => {
-    const { error } = userSchema.validate(req.body);
+    res.cookie('token', token, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Lax',
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
 
-    if (error) {
-        return res.status(400).json({ message: error.details[0].message });
-    }
-    const userExist = await User.findOne({ email: req.body.email })
+    res.status(200).json({
+        message: 'User logged in successfully',
+        user: userExist,
+        token,
+    });
+});
 
+// 🟢 Register/Create User
+export const createUser = asyncHandler(async (req, res) => {
+    const userExist = await User.findOne({ email: req.body.email });
     if (userExist) {
-        return res.status(200).json({ message: 'User already exist' });
+        res.status(409); // Conflict
+        throw new Error('User already exists');
     }
-    await User.create({ ...req.body })
-    try {
-        return res.status(201).json({ message: 'User created successfully' });
-    } catch (error) {
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-}
 
-export const logoutUser = async (req, res) => {
-    try {
-        res.clearCookie('token', {
-            httpOnly: false,
-            secure: process.env.NODE_ENV === 'production', // 🔐 Only HTTPS in production
-            sameSite: 'Lax',
-        });
-        res.status(200).json({ message: 'User logged out successfully' });
-    } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
-    }
-}
+    await User.create({ ...req.body });
 
-export const forgotPassword = async (req, res) => {
+    res.status(201).json({ message: 'User created successfully' });
+});
+
+// 🔴 Logout User
+export const logoutUser = asyncHandler(async (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Lax',
+    });
+
+    res.status(200).json({ message: 'User logged out successfully' });
+});
+
+// 🔁 Forgot Password (Send Reset Email)
+export const forgotPassword = asyncHandler(async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    // genrate token for reset password
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
     const token = generateToken(user._id, user.role);
-
     const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
     try {
         await transporter.sendMail({
             to: email,
             subject: 'Reset Your Password',
-            html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`
+            html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>`,
         });
 
-        return res.json({ message: 'Reset link sent' });
+        res.status(200).json({ message: 'Reset link sent successfully' });
     } catch (error) {
-        console.log("Error sending email:", error);
-
-        return res.status(500).json({ message: 'Something went wrong' });
+        res.status(500);
+        throw new Error('Failed to send reset email');
     }
+});
 
-}
-
-export const resetPassword = async (req, res) => {
+// 🔁 Reset Password
+export const resetPassword = asyncHandler(async (req, res) => {
     const { token, newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+        res.status(400);
+        throw new Error('Password must be at least 6 characters long');
+    }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findById(decoded.id);
 
-        if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) {
+            res.status(404);
+            throw new Error('User not found');
+        }
 
-        user.password = newPassword
+        user.password = newPassword;
         await user.save();
 
-        res.json({ message: 'Password reset successfully' });
+        res.status(200).json({ message: 'Password reset successfully' });
     } catch (error) {
-        res.status(400).json({ message: 'Invalid or expired token' });
+        res.status(400);
+        throw new Error('Invalid or expired token');
     }
-}
+});

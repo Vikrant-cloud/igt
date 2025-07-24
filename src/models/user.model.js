@@ -2,12 +2,15 @@ import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
+    name: {
+        type: String,
+        required: true,
+    },
     email: {
         type: String,
         required: true,
-        unique: true,
-        match: /.+\@.+\..+/
+        unique: true, // Unique index
+        match: /.+\@.+\..+/,
     },
     password: {
         type: String,
@@ -24,14 +27,18 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: 'https://www.gravatar.com/avatar/0000000000000000000000000000000?d=mp&f=y'
     },
-    bio: { type: String, default: '' },
+    bio: {
+        type: String,
+        default: ''
+    },
     otp: {
         type: String,
         default: null
     },
     otpExpires: {
         type: Date,
-        default: null
+        default: null,
+        index: { expireAfterSeconds: 300 } // TTL Index - 5 mins
     },
     isVerified: {
         type: Boolean,
@@ -43,18 +50,29 @@ const userSchema = new mongoose.Schema({
     },
     resetPasswordExpires: {
         type: Date,
-        default: null
+        default: null,
+        index: { expireAfterSeconds: 3600 } // TTL Index - 1 hour
     },
     isActive: {
         type: Boolean,
         default: true
     },
-    stripeCustomerId: String,
-    subscriptionStatus: String,
-    currentPeriodEnd: Date,
+    stripeCustomerId: {
+        type: String
+    },
+    subscriptionStatus: {
+        type: String,
+        index: true // Normal index
+    },
+    currentPeriodEnd: {
+        type: Date,
+        index: true // Date-based index
+    }
 }, { timestamps: true });
 
-// Hash password before saving
+//
+// 🔐 Password Hashing
+//
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
     this.password = await bcrypt.hash(this.password, 10);
@@ -64,6 +82,24 @@ userSchema.pre('save', async function (next) {
 userSchema.methods.comparePassword = function (candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);
 };
+
+//
+// 📌 Additional Indexes
+//
+
+// 🔍 Text Index on bio
+userSchema.index({ bio: 'text' });
+
+// 📦 Compound Index: email + isVerified
+userSchema.index({ email: 1, isVerified: -1 });
+
+// ✅ Partial Index: only for verified users
+userSchema.index({ email: 1 }, {
+    partialFilterExpression: { isVerified: true }
+});
+
+// 🟡 Sparse Index (optional fields)
+userSchema.index({ isActive: 1 }, { sparse: true });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);
 export default User;

@@ -9,6 +9,7 @@ export interface User {
     email: string;
     role: string;
     subscriptionStatus?: string;
+    currentPeriodEnd?: string | number;
 }
 
 interface AuthContextType {
@@ -33,9 +34,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const login: any = async (email: string, password: string, role: string) => {
         await loginUser(email, password, role).then((res) => {
-            toast(res.data.message);
+            toast.success(res.data.message);
         }).catch((error) => {
-            toast.success(error.response.data.message);
+            toast.error(error.response.data.message);
         })
         await fetchCurrentUser().then((res) => {
             setUser(res.data.user);

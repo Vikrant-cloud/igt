@@ -3,17 +3,16 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import http from 'http';
 import cors from 'cors';
-import { fileURLToPath } from 'url';
-import path from 'path';
 
 import connectDB from './src/config/db.js';
 import authRouter from './src/routes/auth.routes.js';
 import userRoutes from './src/routes/user.routes.js';
 import contentRoutes from './src/routes/content.routes.js';
-// import upload from './src/routes/upload.route.js';
-import initSocket from './src/socket/socket.js';
 import paymentRoutes from './src/routes/payment.routes.js';
 import webhookRoute from './src/routes/webhook.js';
+import initSocket from './src/socket/socket.js';
+import { notFound, errorHandler } from './src/middlewares/errorMiddleware.js';
+import { serveFrontend } from './src/utils/serveFrontend.js';
 
 dotenv.config();
 connectDB();
@@ -21,38 +20,33 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+// 🧾 Stripe Webhook - raw body must come before express.json()
 app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoute);
 
-
-// Middleware
+// 🔧 Middleware
 app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
     origin: process.env.CORS_ORIGIN || '*',
-    credentials: true
+    credentials: true,
 }));
-app.use(cookieParser());
 
-// Routes
+// 🚦 API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRoutes);
-// app.use('/api', upload);
 app.use('/api/content', contentRoutes);
-app.use("/api/subscription", paymentRoutes);
+app.use('/api/subscription', paymentRoutes);
 
+// 🌐 Serve Frontend (Vite build)
+serveFrontend(app);
 
-// Optional: Serve static uploads
-// app.use('/uploads', express.static(path.join(__dirname, './uploads')));
+// ⚠️ Global Error Handlers
+app.use(notFound);
+app.use(errorHandler);
 
-app.use(express.static(path.join(__dirname, './frontend/dist')));
-
-app.get("/*splat", (req, res) => {
-    return res.sendFile(path.join(__dirname, './frontend/dist/index.html'));
-});
-
+// 🔌 Initialize Socket.IO
 initSocket(server);
 
+// 🚀 Start Server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
