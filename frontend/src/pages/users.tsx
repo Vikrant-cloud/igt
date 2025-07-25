@@ -112,75 +112,81 @@ export default function Users() {
 
     return (
         <Layout>
-            <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-4">Users List</h2>
-                <div className="overflow-x-auto rounded-lg shadow-md">
-                    <table className="min-w-full text-sm text-left text-gray-700">
-                        <thead className="bg-gray-100 text-xs uppercase text-gray-600">
-                            <tr>
-                                <th className="px-6 py-3">Profile</th>
-                                <th className="px-6 py-3">Name</th>
-                                <th className="px-6 py-3">Email</th>
-                                <th className="px-6 py-3">Role</th>
-                                <th className="px-6 py-3">Active</th>
-                                <th className="px-6 py-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {data?.users.map((user: User) => (
-                                <tr key={user._id} className="border-b hover:bg-gray-50">
-                                    <img
-                                        src={user.profilePicture}
-                                        alt="Profile Preview"
-                                        className="mt-2 h-16 w-16 rounded-full object-cover"
-                                    />
-                                    <td className="px-6 py-4 font-medium">{user.name}</td>
-                                    <td className="px-6 py-4">{user.email}</td>
-                                    <td className="px-6 py-4">{user.role}</td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                            {user.isActive ? 'Active' : 'Inactive'}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 space-x-2">
-                                        <button
-                                            onClick={() => handleEdit(user?._id)}
-                                            className="px-3 py-1 text-blue-600 border border-blue-600 rounded hover:bg-blue-50"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(user._id)}
-                                            className="px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            {data?.users.length === 0 && (
+            <div className="min-h-screen mx-auto w-full bg-gradient-to-br from-indigo-50 flex flex-col items-center justify-start">
+                <div className="w-full">
+                    <div className="rounded-2xl bg-gradient-to-r from-indigo-500 to-pink-400 px-6 py-5 shadow-lg flex items-center justify-center mb-6">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-wide text-center w-full">Users List</h2>
+                    </div>
+                    <div className="overflow-x-auto rounded-2xl shadow-lg bg-white">
+                        <table className="min-w-full text-sm text-left text-gray-700">
+                            <thead className="bg-gray-100 text-xs uppercase text-gray-600">
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
-                                        No users found.
-                                    </td>
+                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Profile</th>
+                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Name</th>
+                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Email</th>
+                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Role</th>
+                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Active</th>
+                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Actions</th>
                                 </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {data?.users.map((user: User) => (
+                                    <tr key={user._id} className="border-b hover:bg-gray-50 transition-colors">
+                                        <td className="px-4 sm:px-6 py-4">
+                                            <img
+                                                src={user.profilePicture}
+                                                alt="Profile Preview"
+                                                className="h-12 w-12 sm:h-16 sm:w-16 rounded-full object-cover border border-gray-200 mx-auto"
+                                            />
+                                        </td>
+                                        <td className="px-4 sm:px-6 py-4 font-medium whitespace-nowrap">{user.name}</td>
+                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">{user.email}</td>
+                                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">{user.role}</td>
+                                        <td className="px-4 sm:px-6 py-4">
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                                {user.isActive ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 sm:px-6 py-4 space-x-2 whitespace-nowrap">
+                                            <button
+                                                onClick={() => handleEdit(user?._id)}
+                                                className="px-3 py-1 text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors cursor-pointer"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(user._id)}
+                                                className="px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                                {data?.users.length === 0 && (
+                                    <tr>
+                                        <td colSpan={6} className="px-4 sm:px-6 py-4 text-center text-gray-500">
+                                            No users found.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             {/* Edit User Modal */}
             <Dialog open={isModalOpen} onClose={handleModalClose} className="relative z-50">
                 <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-                <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <Dialog.Panel className="w-full max-w-md bg-white rounded-lg p-6 shadow-xl relative">
+                <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
+                    <Dialog.Panel className="w-full max-w-md bg-white rounded-lg p-4 sm:p-6 shadow-xl relative">
                         <button
                             onClick={handleModalClose}
-                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl"
                         >
                             ✕
                         </button>
-                        <Dialog.Title className="text-lg font-bold mb-4">
+                        <Dialog.Title className="text-lg font-bold mb-4 text-indigo-700">
                             Edit User
                         </Dialog.Title>
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -189,7 +195,7 @@ export default function Users() {
                                 <input
                                     {...register("name")}
                                     type="text"
-                                    className="mt-1 block w-full border border-gray-300 rounded p-2"
+                                    className="mt-1 block w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-indigo-400"
                                 />
                             </div>
                             <div>
@@ -197,21 +203,11 @@ export default function Users() {
                                 <input
                                     {...register("email")}
                                     type="email"
-                                    className="mt-1 block w-full border border-gray-300 rounded p-2"
+                                    className="mt-1 block w-full border border-gray-300 rounded p-2 focus:ring-2 focus:ring-indigo-400"
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium">Profile Pic</label>
-                                {/* <input
-                                    type="file"
-                                    accept="image/*"
-                                    {...register('profilePicture')}
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0] || null;
-                                        handleProfilePicPreview(file);
-                                    }}
-                                    className="mt-1 block w-full"
-                                /> */}
                                 <Controller
                                     name="profilePicture"
                                     control={control}
@@ -232,14 +228,14 @@ export default function Users() {
                                     <img
                                         src={previewPic}
                                         alt="Profile Preview"
-                                        className="mt-2 h-16 w-16 rounded-full object-cover"
+                                        className="mt-2 h-16 w-16 rounded-full object-cover border border-gray-200 mx-auto"
                                     />
                                 )}
                             </div>
                             <div className="pt-2">
                                 <button
                                     type="submit"
-                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition-colors"
                                 >
                                     Save Changes
                                 </button>
