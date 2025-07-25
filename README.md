@@ -136,6 +136,8 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 - **Stripe** (payments)
 - **Cloudnary** (file upload)
 - **Multer** (file handeling)
+- **Socket.io** (socket)
+- **nodemailer** (send mails)
 
 ### Frontend
 - **React** (with Vite)
