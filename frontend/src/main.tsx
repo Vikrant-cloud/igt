@@ -6,6 +6,7 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { AuthProvider } from '@/context/AuthContext.tsx';
 import { ToastContainer } from 'react-toastify';
 import Loading from '@/components/Loading.tsx';
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const queryClient = new QueryClient();
 
@@ -14,7 +15,9 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Suspense fallback={<Loading />}>
-          <App />
+          <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+            <App />
+          </GoogleOAuthProvider>
           <ToastContainer
             position="top-right"
             autoClose={5000}

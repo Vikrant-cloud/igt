@@ -8,6 +8,9 @@ import { useAuth } from "@/hooks/useAuth";
 import clsx from 'clsx';
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { toast } from "react-toastify";
+import { GoogleLogin } from "@react-oauth/google";
+import type { CredentialResponse } from "@react-oauth/google";
+import api from "@/utils/axios";
 
 type Inputs = {
   email: string
@@ -38,6 +41,23 @@ const Login = () => {
     } finally {
       setLoading(false); // ✅ Loading reset in finally
     }
+  };
+  const handleSuccess = async (response: CredentialResponse) => {
+    if (response.credential) {
+      try {
+        const res = await api.post("/auth/google-login", {
+          token: response.credential,
+        });
+        toast.success(res.data.message);
+        window.location.reload();
+      } catch (error) {
+        console.error("Google login error", error);
+      }
+    }
+  };
+
+  const handleError = () => {
+    toast.error("Google Login Failed");
   };
 
   return (
@@ -101,6 +121,8 @@ const Login = () => {
               >
                 {loading ? <LoadingSpinner /> : "Sign In"}
               </button>
+
+              <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
 
               <p className="text-center text-sm text-gray-500">
                 Not a member?{" "}

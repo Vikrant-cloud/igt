@@ -14,7 +14,6 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
         minlength: 6,
         select: false
     },
@@ -67,6 +66,10 @@ const userSchema = new mongoose.Schema({
     currentPeriodEnd: {
         type: Date,
         index: true // Date-based index
+    },
+    googleId: {
+        type: String,
+        unique: true,
     }
 }, { timestamps: true });
 
@@ -87,8 +90,8 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 // 📌 Additional Indexes
 //
 
-// 🔍 Text Index on bio
-userSchema.index({ bio: 'text' });
+// 🔍 Text Index on name
+userSchema.index({ name: 'text' });
 
 // 📦 Compound Index: email + isVerified
 userSchema.index({ email: 1, isVerified: -1 });

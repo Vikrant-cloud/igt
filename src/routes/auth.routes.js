@@ -5,6 +5,7 @@ import {
   logoutUser,
   forgotPassword,
   resetPassword,
+  googleLogin
 } from '../controller/auth.controller.js';
 
 import { verifyUser } from '../middlewares/verifyUser.js';
@@ -19,5 +20,6 @@ router.post('/signup', validate(userSchema), createUser);
 router.post('/logout', verifyUser, logoutUser);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
+router.post("/google-login", googleLogin);
 
 export default router;

@@ -2,6 +2,9 @@ import asyncHandler from 'express-async-handler';
 import jwt from 'jsonwebtoken';
 import User from '../models/user.model.js';
 import transporter from '../utils/nodemailer.js';
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // 🔐 Generate JWT token
 const generateToken = (userId, userRole) => {
@@ -115,4 +118,51 @@ export const resetPassword = asyncHandler(async (req, res) => {
         res.status(400);
         throw new Error('Invalid or expired token');
     }
+});
+
+// 🟢 Google Login
+export const googleLogin = asyncHandler(async (req, res) => {
+    const { token } = req.body;
+
+    const ticket = await client.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (!payload || !payload.email) {
+        res.status(400);
+        throw new Error("Invalid Google token");
+    }
+
+    const { email, name, picture, sub } = payload;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+        user = await User.create({
+            name,
+            email,
+            googleId: sub,
+            profilePicture: picture,
+            isVerified: true,
+            role: 'user', // Default role, can be changed later
+        });
+    }
+
+    const jwtToken = generateToken(user._id, user.role);
+
+    res.cookie('token', jwtToken, {
+        httpOnly: false,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Lax',
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
+
+    res.status(200).json({
+        message: 'User logged in successfully',
+        user,
+        jwtToken,
+    });
 });
