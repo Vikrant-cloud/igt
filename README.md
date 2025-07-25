@@ -134,6 +134,8 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 - **bcryptjs** (password hashing)
 - **dotenv** (environment variables)
 - **Stripe** (payments)
+- **Cloudnary** (file upload)
+- **Multer** (file handeling)
 
 ### Frontend
 - **React** (with Vite)
