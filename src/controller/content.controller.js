@@ -49,6 +49,7 @@ export const contentList = asyncHandler(async (req, res) => {
                 $project: {
                     title: 1,
                     description: 1,
+                    subject: 1,
                     media: 1,
                     createdAt: 1,
                     'createdBy.name': 1,
@@ -139,6 +140,7 @@ export const homeContentList = asyncHandler(async (req, res) => {
                     title: 1,
                     description: 1,
                     media: 1,
+                    subject: 1,
                     createdAt: 1,
                     'createdBy.name': 1,
                 },

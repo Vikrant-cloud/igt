@@ -29,16 +29,18 @@ export type Content = {
     title: string;
     subject: string;
     description: string;
-    media: string; // Assuming media can be a FileList or a string URL
+    media: string;
     createdBy: string | createdByUser
     createdAt: string
 };
 
 const ContentPage: React.FC = () => {
-    const { user } = useAuth()
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [editContent, setEditContent] = useState<Content | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
     const page = 1;
     const limit = 10;
 
@@ -55,10 +57,10 @@ const ContentPage: React.FC = () => {
     } = useForm<FormValues>();
 
     const handleOpen = () => {
+        reset();
         setIsOpen(true);
         setIsEditMode(false);
-        reset();
-    }
+    };
 
     const handleEdit = (item: Content) => {
         setEditContent(item);
@@ -87,7 +89,7 @@ const ContentPage: React.FC = () => {
         formData.append('title', data.title);
         formData.append('subject', data.subject);
         formData.append('description', data.description);
-        if (data.media && data.media[0]) {
+        if (data.media && (data.media as FileList)[0]) {
             if (typeof data.media === 'string') {
                 formData.append('media', data.media);
             } else if (data.media instanceof FileList && data.media.length > 0) {
@@ -108,7 +110,7 @@ const ContentPage: React.FC = () => {
                 });
                 toast.success('Content created successfully');
             }
-            await refetch()
+            await refetch();
             reset();
             setEditContent(null);
             setIsEditMode(false);
@@ -167,7 +169,10 @@ const ContentPage: React.FC = () => {
                                         Edit
                                     </button>
                                     <button
-                                        onClick={() => handleDelete(item._id)}
+                                        onClick={() => {
+                                            setDeleteId(item._id);
+                                            setConfirmOpen(true);
+                                        }}
                                         className="flex items-center gap-2 bg-gray-300 text-gray-900 hover:bg-gray-400 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
                                     >
                                         <TrashIcon className="w-5 h-5" />
@@ -179,7 +184,7 @@ const ContentPage: React.FC = () => {
                     </div>
                 )}
 
-                {/* Modal */}
+                {/* Content Modal */}
                 <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
                     <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
                     <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -243,6 +248,37 @@ const ContentPage: React.FC = () => {
                                     </button>
                                 </div>
                             </form>
+                        </Dialog.Panel>
+                    </div>
+                </Dialog>
+
+                {/* Confirmation Modal */}
+                <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} className="relative z-50">
+                    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                    <div className="fixed inset-0 flex items-center justify-center p-4">
+                        <Dialog.Panel className="w-full max-w-sm bg-white rounded-lg p-6 shadow-xl relative">
+                            <Dialog.Title className="text-lg font-bold mb-4">Confirm Delete</Dialog.Title>
+                            <p className="mb-6 text-gray-700">Are you sure you want to delete this content? This action cannot be undone.</p>
+                            <div className="flex gap-4 justify-end">
+                                <button
+                                    onClick={() => setConfirmOpen(false)}
+                                    className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        if (deleteId) {
+                                            await handleDelete(deleteId);
+                                            setConfirmOpen(false);
+                                            setDeleteId(null);
+                                        }
+                                    }}
+                                    className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </Dialog.Panel>
                     </div>
                 </Dialog>

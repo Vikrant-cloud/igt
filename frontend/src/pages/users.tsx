@@ -28,6 +28,10 @@ export default function Users() {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [previewPic, setPreviewPic] = useState<string | null>(null);
 
+    // Confirmation modal state
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+
     const { control, register, handleSubmit, reset } = useForm({
         defaultValues: {
             name: selectedUser?.name || "",
@@ -69,9 +73,15 @@ export default function Users() {
         // No need to call reset() here, useEffect will handle it
     };
 
+    // Open confirmation modal instead of direct delete
+    const handleDeleteClick = (userId: string) => {
+        setDeleteId(userId);
+        setConfirmOpen(true);
+    };
+
+    // Actual delete logic
     const handleDelete = async (userId: string) => {
-        console.log('Delete user:', userId);
-        await api.delete(`/users/${userId}`)
+        await api.delete(`/users/${userId}`);
         toast.success("User deleted successfully");
         await refetch(); // Refetch users after deletion
     };
@@ -98,10 +108,7 @@ export default function Users() {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             await refetch(); // Refetch users after update
-            // Optionally refetch users here
-            // await refetch();
             handleModalClose();
-
         } catch (err) {
             console.error("User update error:", err);
         }
@@ -155,7 +162,7 @@ export default function Users() {
                                                 Edit
                                             </button>
                                             <button
-                                                onClick={() => handleDelete(user._id)}
+                                                onClick={() => handleDeleteClick(user._id)}
                                                 className="px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
                                             >
                                                 Delete
@@ -241,6 +248,36 @@ export default function Users() {
                                 </button>
                             </div>
                         </form>
+                    </Dialog.Panel>
+                </div>
+            </Dialog>
+            {/* Confirmation Modal */}
+            <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} className="relative z-50">
+                <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <Dialog.Panel className="w-full max-w-sm bg-white rounded-lg p-6 shadow-xl relative">
+                        <Dialog.Title className="text-lg font-bold mb-4">Confirm Delete</Dialog.Title>
+                        <p className="mb-6 text-gray-700">Are you sure you want to delete this user? This action cannot be undone.</p>
+                        <div className="flex gap-4 justify-end">
+                            <button
+                                onClick={() => setConfirmOpen(false)}
+                                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    if (deleteId) {
+                                        await handleDelete(deleteId);
+                                        setConfirmOpen(false);
+                                        setDeleteId(null);
+                                    }
+                                }}
+                                className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </Dialog.Panel>
                 </div>
             </Dialog>
