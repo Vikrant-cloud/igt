@@ -93,8 +93,8 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 // 🔍 Text Index on name
 userSchema.index({ name: 'text' });
 
-// 📦 Compound Index: email + isVerified
-userSchema.index({ email: 1, isVerified: -1 });
+// // 📦 Compound Index: email + isVerified
+// userSchema.index({ email: 1, isVerified: -1 });
 
 // ✅ Partial Index: only for verified users
 userSchema.index({ email: 1 }, {
