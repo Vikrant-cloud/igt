@@ -156,8 +156,8 @@ VITE_GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
 
 ### 1. Clone the repository
 ```sh
-git clone https://github.com/Vikrant-cloud/IGT
-cd IGT
+git clone https://github.com/Vikrant-cloud/igt
+cd igt
 ```
 
 ### 2. Setup Backend
