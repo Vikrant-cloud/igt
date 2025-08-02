@@ -5,12 +5,11 @@ import { Link } from 'react-router';
 import AuthLayout from "@/components/Layouts/AuthLayout";
 import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
-import clsx from 'clsx';
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 import type { CredentialResponse } from "@react-oauth/google";
 import api from "@/utils/axios";
+import Button from "@/components/Button";
 
 type Inputs = {
   email: string
@@ -61,7 +60,7 @@ const Login = () => {
   };
 
   return (
-    <AuthLayout type="login">
+    <AuthLayout type="Login to your account">
       <div className="flex items-center justify-center px-4 py-10">
         <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 w-full max-w-6xl flex flex-col-reverse lg:flex-row items-center gap-8">
           {/* Form Section */}
@@ -120,29 +119,20 @@ const Login = () => {
                 </Link>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className={clsx(
-                  'w-full bg-red-500 text-white py-3 rounded-full font-semibold tracking-widest transition',
-                  loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-red-600'
-                )}
-              >
-                {loading ? <LoadingSpinner /> : "Sign In"}
-              </button>
+              <Button name={"Login"} loading={loading} />
 
               <div className="flex justify-center w-full">
                 <div className="w-full">
-                  <GoogleLogin 
-                  onSuccess={handleSuccess} 
-                  onError={handleError} 
-                  text="continue_with"
-                  shape="circle"
-                  size="large"
-                  width="100%"
-                  theme="outline"
-                  type="standard"
-                  useOneTap
+                  <GoogleLogin
+                    onSuccess={handleSuccess}
+                    onError={handleError}
+                    text="continue_with"
+                    shape="circle"
+                    size="large"
+                    width="100%"
+                    theme="outline"
+                    type="standard"
+                    useOneTap
                   />
                 </div>
               </div>

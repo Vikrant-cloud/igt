@@ -6,7 +6,7 @@ export default function NavBar() {
       <h1 className="text-lg font-semibold text-gray-800">Welcome Back, {user?.name}</h1>
       <div className="flex items-center space-x-4">
         <img
-          src="https://ui-avatars.com/api/?name=User"
+          src={user?.profilePicture || '/images/default-profile.png'}
           alt="Profile"
           className="w-8 h-8 rounded-full border"
         />

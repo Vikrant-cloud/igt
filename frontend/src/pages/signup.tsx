@@ -6,8 +6,7 @@ import { createUser } from "@/api/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 import { useState } from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import clsx from "clsx";
+import Button from "@/components/Button";
 
 type Inputs = {
   name: string
@@ -21,7 +20,7 @@ const Signup = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -46,7 +45,7 @@ const Signup = () => {
   }
 
   return (
-    <AuthLayout type="signup">
+    <AuthLayout type="Create a new account">
       <div className="flex items-center justify-center px-4 py-10">
 
         <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 w-full max-w-6xl flex flex-col-reverse lg:flex-row items-center gap-8">
@@ -129,16 +128,7 @@ const Signup = () => {
               </div>
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className={clsx(
-                  'w-full bg-red-500 text-white py-3 rounded-full font-semibold tracking-widest transition',
-                  loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-red-600'
-                )}
-                >
-                {loading ? <LoadingSpinner /> : "Sign up"}
-              </button>
+              <Button name={"Sign Up"} loading={loading} />
             </form>
 
             {/* Footer Link */}

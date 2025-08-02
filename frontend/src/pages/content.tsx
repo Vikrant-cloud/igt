@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useForm, } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { Dialog } from '@headlessui/react';
-import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
 import Layout from '@/components/Layouts/Layout';
 import api from '@/utils/axios';
@@ -10,6 +9,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useReactQuery } from '@/utils/useReactQuery';
 import { getContentList } from '@/api/auth';
 import { toast } from 'react-toastify';
+import Button from '@/components/Button';
+import InputBox from '@/components/InputBox';
+import Modal from '@/components/Modal';
 
 type createdByUser = {
     _id: string;
@@ -41,6 +43,7 @@ const ContentPage: React.FC = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
     const page = 1;
     const limit = 10;
 
@@ -53,6 +56,7 @@ const ContentPage: React.FC = () => {
         register,
         handleSubmit,
         reset,
+        watch,
         formState: { errors },
     } = useForm<FormValues>();
 
@@ -85,11 +89,12 @@ const ContentPage: React.FC = () => {
     };
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
+        setLoading(true);
         const formData = new FormData();
         formData.append('title', data.title);
         formData.append('subject', data.subject);
         formData.append('description', data.description);
-        if (data.media && (data.media as FileList)[0]) {
+        if (data.media || data.media[0]) {
             if (typeof data.media === 'string') {
                 formData.append('media', data.media);
             } else if (data.media instanceof FileList && data.media.length > 0) {
@@ -116,6 +121,8 @@ const ContentPage: React.FC = () => {
             setIsEditMode(false);
         } catch (err) {
             console.error('Upload Error:', err);
+        } finally {
+            setLoading(false);
         }
         setIsOpen(false);
     };
@@ -125,13 +132,7 @@ const ContentPage: React.FC = () => {
             <div className="p-8 w-full px-4">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold">Content List</h1>
-                    <button
-                        onClick={handleOpen}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow"
-                    >
-                        <PlusIcon className="w-5 h-5" />
-                        Create Content
-                    </button>
+                    <Button name={"Create Content"} onClick={handleOpen} type={true} />
                 </div>
 
                 {data?.contents?.length === 0 ? (
@@ -185,72 +186,22 @@ const ContentPage: React.FC = () => {
                 )}
 
                 {/* Content Modal */}
-                <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
-                    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-                    <div className="fixed inset-0 flex items-center justify-center p-4">
-                        <Dialog.Panel className="w-full max-w-md bg-white rounded-lg p-6 shadow-xl relative">
-                            <button
-                                onClick={() => setIsOpen(false)}
-                                className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
-                            >
-                                <XMarkIcon className="h-5 w-5" />
-                            </button>
-                            <Dialog.Title className="text-lg font-bold mb-4">
-                                {isEditMode ? 'Edit Content' : 'Create New Content'}
-                            </Dialog.Title>
 
-                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium">Title</label>
-                                    <input
-                                        type="text"
-                                        {...register('title', { required: true })}
-                                        className="mt-1 block w-full border border-gray-300 rounded p-2"
-                                    />
-                                    {errors.title && <p className="text-red-500 text-sm">Title is required.</p>}
-                                </div>
+                <Modal isOpen={isOpen} setIsOpen={setIsOpen} isEditMode={isEditMode}>
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                        <InputBox title="title" register={register} errors={errors} errorMsg="Title is required." />
 
-                                <div>
-                                    <label className="block text-sm font-medium">Subject</label>
-                                    <input
-                                        type="text"
-                                        {...register('subject', { required: true })}
-                                        className="mt-1 block w-full border border-gray-300 rounded p-2"
-                                    />
-                                    {errors.subject && <p className="text-red-500 text-sm">Subject is required.</p>}
-                                </div>
+                        <InputBox title="subject" register={register} errors={errors} errorMsg="Subject is required." />
 
-                                <div>
-                                    <label className="block text-sm font-medium">Description</label>
-                                    <textarea
-                                        {...register('description', { required: true })}
-                                        className="mt-1 block w-full border border-gray-300 rounded p-2"
-                                    />
-                                    {errors.description && <p className="text-red-500 text-sm">Description is required.</p>}
-                                </div>
+                        <InputBox title="description" register={register} errors={errors} errorMsg="Description is required." inputType="textarea" />
 
-                                <div>
-                                    <label className="block text-sm font-medium">Media</label>
-                                    <input
-                                        type="file"
-                                        accept="image/*,video/*"
-                                        {...register('media')}
-                                        className="mt-1 block w-full"
-                                    />
-                                </div>
+                        <InputBox title="media" register={register} errors={errors} errorMsg="Media is required." type="file" />
 
-                                <div className="pt-2">
-                                    <button
-                                        type="submit"
-                                        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
-                                    >
-                                        Submit
-                                    </button>
-                                </div>
-                            </form>
-                        </Dialog.Panel>
-                    </div>
-                </Dialog>
+                        <div className="pt-2">
+                            <Button name={isEditMode ? "Update Content" : "Create Content"} loading={loading} />
+                        </div>
+                    </form>
+                </Modal >
 
                 {/* Confirmation Modal */}
                 <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} className="relative z-50">

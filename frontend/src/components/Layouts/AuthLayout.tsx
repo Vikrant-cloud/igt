@@ -11,7 +11,7 @@ const AuthLayout = ({ children, type }: { children: ReactNode, type: string }) =
             className="mx-auto h-32 w-auto"
           />
           <h1 className="mt-1 text-center text-3xl/9 font-bold tracking-tight text-white">
-            {`${type === 'login' ? 'Welcome Back to you' : 'Sign up to new'} account`}
+            {type}
           </h1>
         </div>
       </div>

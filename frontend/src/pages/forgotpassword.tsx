@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import api from "@/utils/axios";
 import { toast } from "react-toastify";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import clsx from "clsx";
+import Button from "@/components/Button";
+import { Link } from "react-router";
 
 type Inputs = {
     email: string
@@ -24,7 +24,7 @@ export default function ForgotPassword() {
             .then(response => {
                 setLoading(false);
                 console.log("Password reset link sent to email:", response.data);
-                toast.success("Password reset link sent to your email.");
+                toast.success("Password reset link sent to your email. Please check your inbox.");
             })
             .catch(error => {
                 setLoading(false);
@@ -34,7 +34,7 @@ export default function ForgotPassword() {
     }
 
     return (
-        <AuthLayout type="forgot-password">
+        <AuthLayout type="Forgot your password">
             <div className="flex items-center justify-center px-4 py-10">
                 <div className="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 w-full max-w-6xl flex flex-col-reverse lg:flex-row items-center gap-8">
                     {/* Form Section */}
@@ -50,16 +50,12 @@ export default function ForgotPassword() {
                             {errors.email && (
                                 <span className="text-red-500 text-sm">Email is required</span>
                             )}
-                            <button
-                                disabled={loading}
-                                className={clsx(
-                                    'w-full bg-red-500 text-white py-3 rounded-full font-semibold tracking-widest transition',
-                                    loading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-red-600'
-                                )}
-                            >
-                                {loading ? <LoadingSpinner /> : "Send Link"}
-                            </button>
+                            <Button name="Send Reset Link" loading={loading} />
+                            <Link to="/login" className="hover:text-red-500">
+                                Back to Login
+                            </Link>
                         </form>
+
                     </div>
                     {/* Illustration Section */}
                     <div className="w-full lg:w-1/2 flex justify-center">

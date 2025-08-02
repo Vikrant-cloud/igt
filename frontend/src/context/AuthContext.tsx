@@ -10,6 +10,7 @@ export interface User {
     role: string;
     subscriptionStatus?: string;
     currentPeriodEnd?: string | number;
+    profilePicture?: string;
 }
 
 interface AuthContextType {
