@@ -28,8 +28,8 @@ export const loginUser = asyncHandler(async (req, res) => {
     const token = generateToken(userExist._id, userExist.role);
 
     res.cookie('token', token, {
-        httpOnly: true,
-        secure: true, // only works on HTTPS (Vercel is fine)
+        httpOnly: false,
+        secure: false, // only works on HTTPS (Vercel is fine)
         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
         maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
