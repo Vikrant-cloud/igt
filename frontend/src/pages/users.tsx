@@ -114,7 +114,10 @@ export default function Users() {
         }
     };
 
-    if (isLoading) return <Loading />;
+    if (isLoading) return (
+        <Layout>
+            <Loading />
+        </Layout>);
     if (isError) return <p>Error: {error.message}</p>;
 
     return (

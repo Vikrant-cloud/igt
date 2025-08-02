@@ -12,6 +12,7 @@ import { toast } from 'react-toastify';
 import Button from '@/components/Button';
 import InputBox from '@/components/InputBox';
 import Modal from '@/components/Modal';
+import Loading from '@/components/Loading';
 
 type createdByUser = {
     _id: string;
@@ -47,7 +48,7 @@ const ContentPage: React.FC = () => {
     const page = 1;
     const limit = 10;
 
-    const { data, refetch } = useReactQuery(
+    const { data, refetch, isLoading } = useReactQuery(
         ['content', page, limit],
         () => getContentList({ queryKey: ['content', page, limit] }),
     );
@@ -125,6 +126,12 @@ const ContentPage: React.FC = () => {
         }
         setIsOpen(false);
     };
+
+    if (isLoading) return (
+        <Layout>
+            <Loading />
+        </Layout>
+    );
 
     return (
         <Layout>
