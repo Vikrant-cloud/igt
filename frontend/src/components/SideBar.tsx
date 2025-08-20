@@ -20,9 +20,9 @@ export default function SideBar() {
             Users
           </Link>
         )}
-        <Link to={`/content`} className={isActive('/content')}>
+        <Link to={`/courses`} className={isActive('/courses')}>
           <HiOutlineDocumentText size={20} />
-          Content
+          My Courses
         </Link>
         <Link to="/subscription" className={isActive('/subscription')}>
           <HiOutlineCreditCard size={20} />

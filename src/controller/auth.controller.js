@@ -20,9 +20,14 @@ export const loginUser = asyncHandler(async (req, res) => {
         role: req.body.role,
     }).select('+password');
 
-    if (!userExist || !(await userExist.comparePassword(req.body.password))) {
+    if (!userExist) {
         res.status(401); // Unauthorized
-        throw new Error('Invalid credentials');
+        throw new Error('No user found!');
+    }
+
+    if (!(await userExist.comparePassword(req.body.password))) {
+        res.status(401); // Unauthorized
+        throw new Error('Incorrect password!');
     }
 
     const token = generateToken(userExist._id, userExist.role);

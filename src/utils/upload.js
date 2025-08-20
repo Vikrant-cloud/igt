@@ -12,7 +12,7 @@ const storage = new CloudinaryStorage({
             resource_type: isVideo ? 'video' : 'image',
             allowed_formats: ['jpg', 'jpeg', 'png', 'mp4'],
             ...(isVideo
-                ? {} // No transformation for video
+                ? {}
                 : {
                     transformation: [{ width: 500, height: 500, crop: 'limit' }],
                 }),

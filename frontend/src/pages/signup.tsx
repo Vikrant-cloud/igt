@@ -7,14 +7,24 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import Button from "@/components/Button";
+import type { Inputs } from "@/types/user";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup"
 
-type Inputs = {
-  name: string
-  email: string,
-  role: string
-  password: string
-  confirmPassword: string
-}
+const schema = Yup.object().shape({
+  name: Yup.string().required("Name is required"),
+  email: Yup.string()
+    .email("Invalid email format")
+    .required("Email is required"),
+  role: Yup.string().required("Please select role."),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
+  confirmPassword: Yup.string()
+    .required("Confirm Password is required")
+    .oneOf([Yup.ref("password")], "Passwords must match"),
+
+});
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -26,13 +36,15 @@ const Signup = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Inputs>()
+  } = useForm<Inputs>({
+    resolver: yupResolver(schema)
+  })
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     setLoading(true)
     try {
       const response = await createUser({ ...data });
       toast.success(response?.data?.message || "User created successfully!");
-      await login(data.email, data.password, data.role); // Log in after signup
+      await login(data.email, data.password, data.role);
       navigate("/");
     } catch (error: any) {
       console.error("User creation failed:", error);
@@ -63,14 +75,13 @@ const Signup = () => {
 
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 w-full" >
-              {/* Name */}
               <div>
                 <input
-                  {...register("name", { required: true })}
+                  {...register("name", { required: "Name required" })}
                   className="w-full px-5 py-3 rounded-full bg-gray-100 outline-none focus:ring-2 focus:ring-red-400 text-sm sm:text-base"
                   placeholder="Enter your name"
                 />
-                {errors.name && <span className="text-red-500 text-sm">This field is required</span>}
+                {errors.name && <span className="text-red-500 text-sm">{errors.name.message}</span>}
               </div>
 
               {/* Email */}
@@ -80,7 +91,7 @@ const Signup = () => {
                   className="w-full px-5 py-3 rounded-full bg-gray-100 outline-none focus:ring-2 focus:ring-red-400 text-sm sm:text-base"
                   placeholder="Enter your email"
                 />
-                {errors.email && <span className="text-red-500 text-sm">Email is required</span>}
+                {errors.email && <span className="text-red-500 text-sm">{errors.email.message}</span>}
               </div>
 
               {/* Password */}
@@ -91,7 +102,7 @@ const Signup = () => {
                   className="w-full px-5 py-3 rounded-full bg-gray-100 outline-none focus:ring-2 focus:ring-red-400 text-sm sm:text-base"
                   placeholder="Enter a Password"
                 />
-                {errors.password && <span className="text-red-500 text-sm">Password is required</span>}
+                {errors.password && <span className="text-red-500 text-sm">{errors.password.message}</span>}
               </div>
 
               {/* Confirm Password */}
@@ -102,7 +113,7 @@ const Signup = () => {
                   className="w-full px-5 py-3 rounded-full bg-gray-100 outline-none focus:ring-2 focus:ring-red-400 text-sm sm:text-base"
                   placeholder="Confirm Password"
                 />
-                {errors.confirmPassword && <span className="text-red-500 text-sm">Please confirm your password</span>}
+                {errors.confirmPassword && <span className="text-red-500 text-sm">{errors.confirmPassword.message}</span>}
               </div>
 
               {/* Role */}
@@ -121,8 +132,8 @@ const Signup = () => {
                   }}
                 >
                   <option value="">Select Role</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">User</option>
+                  <option value="teacher">Teacher</option>
+                  <option value="student">Student</option>
                 </select>
                 {errors.role && <span className="text-red-500 text-sm">{errors.role.message}</span>}
               </div>

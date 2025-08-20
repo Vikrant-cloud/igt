@@ -11,6 +11,7 @@ export interface User {
     subscriptionStatus?: string;
     currentPeriodEnd?: string | number;
     profilePicture?: string;
+    isVerified?: boolean;
 }
 
 interface AuthContextType {
@@ -34,8 +35,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }, []);
 
     const login: any = async (email: string, password: string, role: string) => {
+        let loggedInUser = {};
         await loginUser(email, password, role).then((res) => {
             toast.success(res.data.message);
+            loggedInUser = res.data.user;
         }).catch((error) => {
             toast.error(error.response.data.message);
         })
@@ -45,6 +48,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             toast.error(error.response.message)
         })
         setLoading(false);
+        return loggedInUser
     };
 
     const logout = async () => {

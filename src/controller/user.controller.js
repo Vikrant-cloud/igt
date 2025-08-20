@@ -1,6 +1,7 @@
 import asyncHandler from 'express-async-handler';
 import User from '../models/user.model.js';
 import Content from '../models/content.model.js';
+import { trusted } from 'mongoose';
 
 // @desc   Get logged-in user's profile
 // @route  GET /api/users/profile
@@ -78,3 +79,15 @@ export const usersList = asyncHandler(async (req, res) => {
         },
     });
 });
+
+export const approveUser = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndUpdate(id, { isVerified: true });
+    if (!user) {
+        res.status(404);
+        throw new Error('User not found');
+    }
+
+    return res.status(200).json({ message: 'User approved successfully' });
+})

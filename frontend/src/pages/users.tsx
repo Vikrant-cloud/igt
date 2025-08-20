@@ -8,6 +8,7 @@ import React from "react";
 import api from "@/utils/axios";
 import { toast } from "react-toastify";
 import Loading from "@/components/Loading";
+import Button from "@/components/Button";
 
 interface User {
     _id: string;
@@ -16,6 +17,7 @@ interface User {
     role: string;
     isActive: boolean;
     profilePicture?: string;
+    isVerified?: boolean;
 }
 
 export default function Users() {
@@ -86,6 +88,12 @@ export default function Users() {
         await refetch(); // Refetch users after deletion
     };
 
+    const handleApprove = async (userId: string) => {
+        await api.post(`/users/approve-request/${userId}`);
+        toast.success("User aprroved successfully");
+        await refetch(); // Refetch users after deletion
+    };
+
     const handleModalClose = () => {
         setIsModalOpen(false);
         setSelectedUser(null);
@@ -135,7 +143,7 @@ export default function Users() {
                                     <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Name</th>
                                     <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Email</th>
                                     <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Role</th>
-                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Active</th>
+                                    <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Status</th>
                                     <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Actions</th>
                                 </tr>
                             </thead>
@@ -154,10 +162,14 @@ export default function Users() {
                                         <td className="px-4 sm:px-6 py-4 whitespace-nowrap">{user.role}</td>
                                         <td className="px-4 sm:px-6 py-4">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                {user.isActive ? 'Active' : 'Inactive'}
+                                                {user.isVerified ? 'Approved' : 'Unapproved'}
                                             </span>
                                         </td>
                                         <td className="px-4 sm:px-6 py-4 space-x-2 whitespace-nowrap">
+                                            {!user.isVerified &&
+                                                <Button name="Approve" onClick={() => handleApprove(user?._id)} type={true} />
+                                            }
+
                                             <button
                                                 onClick={() => handleEdit(user?._id)}
                                                 className="px-3 py-1 text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors cursor-pointer"

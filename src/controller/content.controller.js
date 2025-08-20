@@ -29,7 +29,7 @@ export const contentList = asyncHandler(async (req, res) => {
     const skip = (page - 1) * limit;
 
     const matchStage =
-        req.user.role === 'user'
+        req.user.role === 'teacher'
             ? { $match: { createdBy: new mongoose.Types.ObjectId(req.user.id) } }
             : { $match: {} };
 
@@ -53,13 +53,15 @@ export const contentList = asyncHandler(async (req, res) => {
                     media: 1,
                     createdAt: 1,
                     'createdBy.name': 1,
+                    price: 1,
+                    isApproved: 1,
                 },
             },
             { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
         ]),
-        Content.countDocuments(req.user.role === 'user' ? { createdBy: req.user.id } : {}),
+        Content.countDocuments(req.user.role === 'teacher' ? { createdBy: req.user.id } : { isApproved: true }),
     ]);
 
     res.status(200).json({
@@ -127,6 +129,9 @@ export const homeContentList = asyncHandler(async (req, res) => {
     const [content, total] = await Promise.all([
         Content.aggregate([
             {
+                $match: { isApproved: true }
+            },
+            {
                 $lookup: {
                     from: 'users',
                     localField: 'createdBy',
@@ -161,4 +166,17 @@ export const homeContentList = asyncHandler(async (req, res) => {
             pageSize: limit,
         },
     });
+});
+
+export const approveCourse = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const content = await Content.findByIdAndUpdate(id, { isApproved: true }, { new: true });
+
+    if (!content) {
+        res.status(404);
+        throw new Error('Content not found');
+    }
+
+    res.status(200).json({ message: 'Course approved successfully', content });
 });

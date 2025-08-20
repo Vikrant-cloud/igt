@@ -31,10 +31,8 @@ const Login = () => {
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
       setLoading(true);
-      await login(data.email, data.password, data.role).then((response) => {
-        toast.success(response.message);
-      })
-      navigate("/");
+      await login(data.email, data.password, data.role)
+      setLoading(false);
     } catch (error: any) {
       setLoading(false)
     } finally {
@@ -102,8 +100,8 @@ const Login = () => {
                 }}
               >
                 <option value="" className="text-gray-400 rounded-full bg-white">Select Role</option>
-                <option value="admin" className="text-black rounded-full bg-white hover:bg-gray-100">Admin</option>
-                <option value="user" className="text-black rounded-full bg-white hover:bg-gray-100" >User</option>
+                <option value="teacher" className="text-black rounded-full bg-white hover:bg-gray-100">Teacher</option>
+                <option value="student" className="text-black rounded-full bg-white hover:bg-gray-100" >Student</option>
               </select>
               {errors.role && (
                 <span className="text-red-500 text-sm">{errors.role.message}</span>
@@ -119,7 +117,7 @@ const Login = () => {
                 </Link>
               </div>
 
-              <Button name={"Login"} loading={loading} />
+              <Button name="Login" loading={loading} />
 
               <div className="flex justify-center w-full">
                 <div className="w-full">

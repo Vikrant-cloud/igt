@@ -14,6 +14,8 @@ function initSocket(server) {
 
         socket.on('send_message', async (data) => {
             try {
+                console.log(data, "kjjjjj");
+
                 const res = await fetch(process.env.LLAMA3_URL + '/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

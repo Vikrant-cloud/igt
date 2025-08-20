@@ -11,7 +11,7 @@ export const userSchema = Joi.object({
         .messages({
             'any.only': '{{#label}} does not match password',
         }),
-    role: Joi.string().valid('admin', 'user').required(),
+    role: Joi.string().valid('teacher', 'student').required(),
 });
 
 export const resetPasswordSchema = Joi.object({
@@ -24,5 +24,6 @@ export const contentSchema = Joi.object({
     subject: Joi.string().min(3).max(30).required(),
     media: Joi.string().required(),
     description: Joi.string().required(),
-    createdBy: Joi.string().required()
+    createdBy: Joi.string().required(),
+    price: Joi.string().required()
 })

@@ -4,10 +4,14 @@ import api from '@/utils/axios';
 import clsx from 'clsx';
 import { HiOutlineBadgeCheck } from 'react-icons/hi';
 import { FaCrown } from 'react-icons/fa';
+import { useState } from 'react';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export default function Home() {
     const { user } = useAuth()
+    const [loading, setLoading] = useState(false)
     const handleSubscribe = async () => {
+        setLoading(true)
         const res = await api.post('/subscription/create-checkout-session', {
             email: user?.email,
         });
@@ -33,13 +37,13 @@ export default function Home() {
                     </div>
                     <button
                         onClick={handleSubscribe}
-                        disabled={user?.subscriptionStatus === 'active'}
+                        disabled={user?.subscriptionStatus === 'active' || loading}
                         className={clsx(
                             'w-full bg-gradient-to-r from-indigo-500 to-pink-500 text-white py-4 rounded-full font-bold text-lg shadow-lg transition',
-                            user?.subscriptionStatus === "active" ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:from-indigo-600 hover:to-pink-600'
+                            user?.subscriptionStatus === "active" || loading ? 'cursor-not-allowed' : 'cursor-pointer hover:from-indigo-600 hover:to-pink-600'
                         )}
                     >
-                        {user?.subscriptionStatus === "active" ? "Subscribed" : "Subscribe Now"}
+                        {loading ? <LoadingSpinner /> : user?.subscriptionStatus === "active" ? "Subscribed" : "Subscribe Now"}
                     </button>
                     {user?.subscriptionStatus === "active" && user?.currentPeriodEnd && (
                         <p className="mt-4 text-green-600 font-semibold text-center">Your subscription ends {new Date(user?.currentPeriodEnd).toLocaleString()}</p>

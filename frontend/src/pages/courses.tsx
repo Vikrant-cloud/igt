@@ -13,6 +13,35 @@ import Button from '@/components/Button';
 import InputBox from '@/components/InputBox';
 import Modal from '@/components/Modal';
 import Loading from '@/components/Loading';
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as Yup from "yup"
+import Course from '@/components/Course/Course';
+
+const allowedTypes = [
+    // Images
+    "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "image/bmp", "image/tiff",
+    // PDF
+    "application/pdf",
+    // Videos
+    "video/mp4", "video/avi", "video/mov", "video/mkv", "video/webm", "video/quicktime", "video/x-msvideo"
+];
+
+const schema = Yup.object().shape({
+    title: Yup.string().required("Title is required"),
+    subject: Yup.string().required("Subject is required"),
+    description: Yup.string().required("Subject is required"),
+    media: Yup.mixed<FileList>()
+        .required("Please upload at least one file")
+        .test("fileType", "Some files have unsupported formats", (value) => {
+            if (!value || value.length === 0) return false;
+            return Array.from(value).every((file) => allowedTypes.includes(file.type));
+        })
+        .test("fileSize", "Some files are too large (max 5MB)", (value) => {
+            if (!value || value.length === 0) return false;
+            return Array.from(value).every((file) => file.size <= 5 * 1024 * 1024);
+        }),
+    price: Yup.string().required("Price is required")
+});
 
 type createdByUser = {
     _id: string;
@@ -23,8 +52,8 @@ type FormValues = {
     title: string;
     subject: string;
     description: string;
-    media: FileList | string;
-    createdBy: string | createdByUser
+    media: FileList;
+    price: string
 };
 
 export type Content = {
@@ -32,9 +61,11 @@ export type Content = {
     title: string;
     subject: string;
     description: string;
-    media: string;
+    media?: string;
     createdBy: string | createdByUser
     createdAt: string
+    price: string
+    isApproved: boolean
 };
 
 const ContentPage: React.FC = () => {
@@ -58,7 +89,9 @@ const ContentPage: React.FC = () => {
         handleSubmit,
         reset,
         formState: { errors },
-    } = useForm<FormValues>();
+    } = useForm<FormValues>({
+        resolver: yupResolver(schema)
+    });
 
     const handleOpen = () => {
         reset();
@@ -74,7 +107,8 @@ const ContentPage: React.FC = () => {
             title: item.title,
             subject: item.subject,
             description: item.description,
-            media: item.media, // File input can't be pre-filled
+            media: undefined,
+            price: item.price
         });
     };
 
@@ -94,6 +128,7 @@ const ContentPage: React.FC = () => {
         formData.append('title', data.title);
         formData.append('subject', data.subject);
         formData.append('description', data.description);
+        formData.append('price', data.price);
         if (data.media || data.media[0]) {
             if (typeof data.media === 'string') {
                 formData.append('media', data.media);
@@ -119,12 +154,14 @@ const ContentPage: React.FC = () => {
             reset();
             setEditContent(null);
             setIsEditMode(false);
-        } catch (err) {
+            setIsOpen(false);
+        } catch (err: any) {
             console.error('Upload Error:', err);
+            toast.error(err.response.data.message)
         } finally {
             setLoading(false);
         }
-        setIsOpen(false);
+
     };
 
     if (isLoading) return (
@@ -146,47 +183,36 @@ const ContentPage: React.FC = () => {
                 ) : (
                     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                         {data?.contents.map((item: Content, idx: string) => (
-                            <div
-                                key={idx}
-                                className="flex flex-col border border-gray-200 bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full group"
-                            >
-                                <div className="flex-1 flex flex-col gap-2">
-                                    <h2 className="text-xl font-bold text-indigo-700 group-hover:text-indigo-900 transition-colors truncate mb-1">{item.title}</h2>
-                                    <p className="text-xs text-gray-400 mb-1">Subject: <span className="text-gray-600 font-medium">{item.subject}</span></p>
-                                    <p className="text-gray-700 text-sm mb-2 line-clamp-3">{item.description}</p>
-                                    {item.media && (
-                                        <div className="w-full aspect-video rounded-lg overflow-hidden mb-2 bg-gray-100 flex items-center justify-center">
-                                            <video className="w-full h-full object-cover rounded-lg" controls>
-                                                <source key={item.media} src={item.media} type="video/mp4" />
-                                                Your browser does not support the video tag.
-                                            </video>
-                                        </div>
-                                    )}
+                            <>
+                                <div
+                                    key={idx}
+                                    className="flex flex-col border border-gray-200 bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full group"
+                                >
+                                    <Course item={item} />
+                                    <div className="flex gap-2 mt-4">
+                                        <button
+                                            onClick={() => handleEdit(item)}
+                                            className="flex items-center gap-2 bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
+                                        >
+                                            <PencilSquareIcon className="w-5 h-5" />
+                                            Buy Course
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setDeleteId(item._id);
+                                                setConfirmOpen(true);
+                                            }}
+                                            className="flex items-center gap-2 bg-gray-300 text-gray-900 hover:bg-gray-400 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
+                                        >
+                                            <TrashIcon className="w-5 h-5" />
+                                            Delete
+                                        </button>
+                                        {
+                                            !item.isApproved && <p>Approval pending</p>
+                                        }
+                                    </div>
                                 </div>
-                                <div className="mt-auto pt-2 border-t border-gray-100 flex flex-col gap-1">
-                                    <p className="text-xs text-gray-400">Created at: <span className="text-gray-500">{new Date(item.createdAt).toLocaleString()}</span></p>
-                                    <p className="text-xs text-gray-400">Created By: <span className="text-gray-500">{typeof item.createdBy === 'string' ? item.createdBy : item.createdBy.name}</span></p>
-                                </div>
-                                <div className="flex gap-2 mt-4">
-                                    <button
-                                        onClick={() => handleEdit(item)}
-                                        className="flex items-center gap-2 bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
-                                    >
-                                        <PencilSquareIcon className="w-5 h-5" />
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setDeleteId(item._id);
-                                            setConfirmOpen(true);
-                                        }}
-                                        className="flex items-center gap-2 bg-gray-300 text-gray-900 hover:bg-gray-400 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
-                                    >
-                                        <TrashIcon className="w-5 h-5" />
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
+                            </>
                         ))}
                     </div>
                 )}
@@ -195,13 +221,11 @@ const ContentPage: React.FC = () => {
 
                 <Modal isOpen={isOpen} setIsOpen={setIsOpen} isEditMode={isEditMode}>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                        <InputBox title="title" register={register} errors={errors} errorMsg="Title is required." />
-
-                        <InputBox title="subject" register={register} errors={errors} errorMsg="Subject is required." />
-
-                        <InputBox title="description" register={register} errors={errors} errorMsg="Description is required." inputType="textarea" />
-
-                        <InputBox title="media" register={register} errors={errors} errorMsg="Media is required." type="file" />
+                        <InputBox title="title" register={register} errors={errors} />
+                        <InputBox title="subject" register={register} errors={errors} />
+                        <InputBox title="description" register={register} errors={errors} inputType="textarea" />
+                        <InputBox title="price" register={register} errors={errors} type="number" />
+                        <InputBox title="media" register={register} errors={errors} type="file" />
 
                         <div className="pt-2">
                             <Button name={isEditMode ? "Update Content" : "Create Content"} loading={loading} />

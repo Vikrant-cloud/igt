@@ -5,7 +5,7 @@ const contentSchema = new mongoose.Schema(
         title: {
             type: String,
             required: true,
-            index: true, // optional if not filtering/sorting directly
+            index: true,
         },
         media: {
             type: String,
@@ -19,11 +19,22 @@ const contentSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        price: {
+            type: String,
+        },
+        isApproved: {
+            type: Boolean,
+            default: false
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true,
             index: true,
+        },
+        purchasedBy: {
+            type: [mongoose.Schema.Types.ObjectId],
+            ref: 'User'
         },
         isDeleted: {
             type: Boolean,
