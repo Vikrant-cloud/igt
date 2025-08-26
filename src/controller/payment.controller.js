@@ -1,35 +1,40 @@
 import asyncHandler from 'express-async-handler';
 import stripe from '../utils/stripe.js';
 import User from '../models/user.model.js';
+import Content from '../models/content.model.js';
 
 // @desc   Create Stripe Checkout session for subscription
 // @route  POST /api/subscription/create-checkout-session
 // @access Public
 export const createCheckoutSession = asyncHandler(async (req, res) => {
-    const { email } = req.body;
+    const { courseId } = req.body;
 
-    let user = await User.findOne({ email });
+    // find course in DB
+    const course = await Content.findById(courseId);
+    if (!course) return res.status(404).json({ error: "Course not found" });
 
-    // If customer not yet created in Stripe
-    if (!user.stripeCustomerId) {
-        const customer = await stripe.customers.create({ email });
-        user.stripeCustomerId = customer.id;
-        await user.save();
-    }
-
-    // Create Checkout session
+    // create checkout session
     const session = await stripe.checkout.sessions.create({
-        mode: 'subscription',
-        customer: user.stripeCustomerId,
+        payment_method_types: ["card"],
+        mode: "payment",
         line_items: [
             {
-                price: process.env.STRIPE_PRICE_ID, // secure & dynamic
+                price_data: {
+                    currency: "usd",
+                    product_data: { name: course.title },
+                    unit_amount: course.price * 100,
+                },
                 quantity: 1,
             },
         ],
         success_url: `${process.env.FRONTEND_URL}/success`,
         cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+        //customer_email: req.user.email,
+        // metadata: { courseId: course._id, userId: req.user.id },
     });
 
-    res.status(200).json({ url: session.url });
+    course.purchasedBy.push(req.user.id);
+    await course.save();
+
+    res.json({ url: session.url });
 });

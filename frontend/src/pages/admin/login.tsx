@@ -27,10 +27,10 @@ const Login = () => {
     const onSubmit: SubmitHandler<Inputs> = async (data) => {
         try {
             setLoading(true);
-            await login(data.email, data.password, 'admin').then((response) => {
-                toast.success(response.message);
-            })
-            navigate("/admin");
+            const user = await login(data.email, data.password, 'admin')
+            if (user?.role === 'admin') {
+                navigate('/admin/dashboard');
+            }
         } catch (error: any) {
             setLoading(false)
         } finally {

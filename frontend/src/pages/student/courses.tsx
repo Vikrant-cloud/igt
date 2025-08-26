@@ -1,21 +1,20 @@
 import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layouts/Layout';
-// import Chat from '@/components/Chat';
 import { useReactQuery } from '@/utils/useReactQuery';
-import { getHomeContentList } from '@/api/auth';
+import { getMyCourses } from '@/api/auth';
 import { ContentList } from '@/components/content';
 import Pagination from '@/components/Pagination';
 import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 
-export default function Dashboard() {
+export default function MyCourses() {
   const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = 10 ;
   const { data } = useReactQuery(
-    ['homeContent', page, limit],
-    () => getHomeContentList({ queryKey: ['homeContent', page, limit] }),
+    ['myCourses', page, limit],
+    () => getMyCourses({ queryKey: ['myCourses', page, limit] }),
   );
   const onPageChange = (newPage: number) => {
     setPage(newPage);

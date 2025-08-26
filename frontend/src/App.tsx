@@ -20,9 +20,11 @@ const ForgotPassword = lazy(() => import('@/pages/forgotpassword'));
 const ResetPassword = lazy(() => import('@/pages/resetPassword'));
 const Users = lazy(() => import('@/pages/users'));
 const Courses = lazy(() => import('@/pages/courses'));
+const MyCourses = lazy(() => import('@/pages/student/courses'));
 const CoursesPage = lazy(() => import('@/pages/admin/coursesPage'));
 const Subscription = lazy(() => import('@/pages/subscription'));
 const ApprovalPending = lazy(() => import('@/pages/approvalpending'));
+const Messages = lazy(() => import('@/pages/teacher/messages'));
 
 function App() {
   return (
@@ -32,7 +34,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
         {/* Admin Private Routes */}
         <Route
-          path="/admin"
+          path="/admin/dashboard"
           element={
             <PrivateRoute>
               <Home />
@@ -55,7 +57,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* Student & Teacher Private Routes */}
+        {/* Student Routes */}
         <Route
           path="/"
           element={
@@ -64,6 +66,7 @@ function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/student/dashboard"
           element={
@@ -73,10 +76,35 @@ function App() {
           }
         />
         <Route
+          path="/student/courses"
+          element={
+            <PrivateRoute>
+              <MyCourses />
+            </PrivateRoute>
+          }
+        />
+        {/* Teacher routes */}
+        <Route
           path="/teacher/dashboard"
           element={
             <PrivateRoute>
-              <DashboardTeacher />
+              <DashboardStudent />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/teacher/courses"
+          element={
+            <PrivateRoute>
+              <Courses />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/teacher/messages"
+          element={
+            <PrivateRoute>
+              <Messages />
             </PrivateRoute>
           }
         />

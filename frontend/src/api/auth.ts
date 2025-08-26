@@ -35,3 +35,9 @@ export const getHomeContentList = async ({ queryKey }: { queryKey: [string, numb
     const { data } = await api.get('/content/home-content?page=' + page + '&limit=' + limit);
     return data
 };
+
+export const getMyCourses = async ({ queryKey }: { queryKey: [string, number, number] }) => {
+    const [_key, page, limit] = queryKey;
+    const { data } = await api.get('/content/my-courses?page=' + page + '&limit=' + limit);
+    return data
+};

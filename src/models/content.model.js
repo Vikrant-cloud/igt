@@ -8,7 +8,7 @@ const contentSchema = new mongoose.Schema(
             index: true,
         },
         media: {
-            type: String,
+            type: [String],
             required: true,
         },
         description: {

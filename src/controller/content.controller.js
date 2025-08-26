@@ -7,9 +7,11 @@ import { contentSchema } from '../utils/validations.js';
 // @route  POST /api/content
 // @access Private
 export const createContent = asyncHandler(async (req, res) => {
-    const media = req.file?.path;
 
-    const { error } = contentSchema.validate({ ...req.body, media });
+    const media = req.files.map(file => file.path);
+    console.log(media);
+
+    const { error } = contentSchema.validate({ ...req.body, media: media });
     if (error) {
         res.status(400);
         throw new Error(error.details[0].message);
@@ -148,6 +150,9 @@ export const homeContentList = asyncHandler(async (req, res) => {
                     subject: 1,
                     createdAt: 1,
                     'createdBy.name': 1,
+                    price: 1,
+                    isApproved: 1,
+                    purchasedBy: 1, // Include purchasedBy field for student view
                 },
             },
             { $sort: { createdAt: -1 } },
@@ -179,4 +184,53 @@ export const approveCourse = asyncHandler(async (req, res) => {
     }
 
     res.status(200).json({ message: 'Course approved successfully', content });
+});
+
+export const myCourses = asyncHandler(async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const [content, total] = await Promise.all([
+        Content.aggregate([
+            {
+                $match: {
+                    purchasedBy: { $in: [new mongoose.Types.ObjectId(req.user.id)] }
+                }
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'createdBy',
+                    foreignField: '_id',
+                    as: 'createdBy',
+                },
+            },
+            { $unwind: '$createdBy' },
+            {
+                $project: {
+                    title: 1,
+                    description: 1,
+                    media: 1,
+                    subject: 1,
+                    createdAt: 1,
+                    'createdBy.name': 1,
+                },
+            },
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+        ]),
+        Content.countDocuments({ purchasedBy: { $in: [new mongoose.Types.ObjectId(req.user.id)] } }),
+    ]);
+
+    res.status(200).json({
+        contents: content,
+        pagination: {
+            total,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit),
+            pageSize: limit,
+        },
+    });
 });

@@ -22,7 +22,7 @@ export const resetPasswordSchema = Joi.object({
 export const contentSchema = Joi.object({
     title: Joi.string().min(3).max(30).required(),
     subject: Joi.string().min(3).max(30).required(),
-    media: Joi.string().required(),
+    media: Joi.array().items(Joi.string().uri()).min(1).required(),
     description: Joi.string().required(),
     createdBy: Joi.string().required(),
     price: Joi.string().required()

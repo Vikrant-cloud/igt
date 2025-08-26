@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode } from "react";
 import NavBar from "@/components/Navbar";
 import Sidebar from "@/components/SideBar";
 import { useAuth } from "@/hooks/useAuth";
@@ -7,6 +7,7 @@ import AdminSideBar from "../AdminSidebar";
 
 const Layout = ({ children }: { children: ReactNode }) => {
     const { user } = useAuth();
+
     return (
         <div className="auth-layout">
             <div className="bg-white">

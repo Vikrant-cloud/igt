@@ -1,5 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Content } from "@/pages/courses";
+import api from "@/utils/axios";
+import { useAuth } from "@/hooks/useAuth";
+import socket from "@/utils/socket";
+import type { User } from "@/context/AuthContext";
 
 type ContentList = {
     contents: Content[]
@@ -9,17 +13,23 @@ const ChatModal = ({
     isOpen,
     onClose,
     teacherName,
+    user,
 }: {
     isOpen: boolean;
     onClose: () => void;
     teacherName: string;
+    user: User;
 }) => {
-    const [messages, setMessages] = useState<{ sender: string; text: string }[]>([]);
+    const [messages, setMessages] = useState<{ message: string, sender: string, reciever: string }[]>([]);
+
     const [input, setInput] = useState("");
 
     const handleSend = () => {
         if (input.trim()) {
-            setMessages([...messages, { sender: "You", text: input }]);
+            console.log("Sending message:", input);
+
+            socket.emit('send_message', { message: input, sender: user.name, reciever: teacherName });
+            setMessages([...messages, { message: input, sender: user.name, reciever: teacherName }]);
             setInput("");
             // Add logic to send message to teacher via API if needed
         }
@@ -43,7 +53,9 @@ const ChatModal = ({
                         messages.map((msg, idx) => (
                             <div key={idx} className="mb-1">
                                 <span className="font-semibold">{msg.sender}: </span>
-                                <span>{msg.text}</span>
+                                <span>{msg.message}</span>
+                                <span className="font-semibold">{msg.reciever}: </span>
+                                <span>{msg.message}</span>
                             </div>
                         ))
                     )}
@@ -76,7 +88,7 @@ export const ContentList = ({
     data: ContentList;
     userRole?: string;
 }) => {
-    
+    const { user } = useAuth();
     const [chatOpen, setChatOpen] = useState(false);
     const [chatTeacher, setChatTeacher] = useState<string>("");
 
@@ -85,9 +97,11 @@ export const ContentList = ({
         setChatOpen(true);
     };
 
-    const handleBuy = (courseId: string) => {
-        // Add your buy course logic here (e.g., redirect to Stripe/payment page)
-        alert(`Buy course: ${courseId}`);
+    const handleBuy = async (course: Content) => {
+        const res = await api.post('/subscription/create-checkout-session', {
+            courseId: course._id
+        });
+        window.location.href = res.data.url;
     };
 
     return (
@@ -105,13 +119,42 @@ export const ContentList = ({
                                 <h2 className="text-xl font-bold text-indigo-700 group-hover:text-indigo-900 transition-colors truncate mb-1">{item.title}</h2>
                                 <p className="text-xs text-gray-400 mb-1">Subject: <span className="text-gray-600 font-medium">{item.subject}</span></p>
                                 <p className="text-gray-700 text-sm mb-2 line-clamp-3">{item.description}</p>
-                                {item.media && (
-                                    <div className="w-full aspect-video rounded-lg overflow-hidden mb-2 bg-gray-100 flex items-center justify-center">
-                                        <video className="w-full h-full object-cover rounded-lg" controls>
-                                            <source key={item.media} src={item.media} type="video/mp4" />
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    </div>
+                                {Array.isArray(item.media) && item.media.length > 0 ? (
+                                    item.media.map((mediaUrl, idx) => (
+                                        <div
+                                            key={idx}
+                                            className="w-full aspect-video rounded-lg overflow-hidden mb-2 bg-gray-100 flex items-center justify-center"
+                                        >
+                                            {mediaUrl.endsWith(".mp4") || mediaUrl.endsWith(".mov") ? (
+                                                // 🎥 Video preview
+                                                <video className="w-full h-full object-cover rounded-lg" controls>
+                                                    <source src={mediaUrl} type="video/mp4" />
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            ) : mediaUrl.endsWith(".pdf") ? (
+                                                // 📄 PDF preview
+                                                <iframe
+                                                    src={mediaUrl}
+                                                    className="w-full h-full rounded-lg"
+                                                    title={`pdf-${idx}`}
+                                                >
+                                                    This browser does not support PDFs.
+                                                    <a href={mediaUrl} target="_blank" rel="noopener noreferrer">
+                                                        Download PDF
+                                                    </a>
+                                                </iframe>
+                                            ) : (
+                                                // 🖼️ Image preview
+                                                <img
+                                                    src={mediaUrl}
+                                                    alt={`media-${idx}`}
+                                                    className="w-full h-full object-cover rounded-lg"
+                                                />
+                                            )}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>No media available</p>
                                 )}
                             </div>
                             <div className="mt-auto pt-2 border-t border-gray-100 flex flex-col gap-1">
@@ -119,9 +162,9 @@ export const ContentList = ({
                                 <p className="text-xs text-gray-400">Created By: <span className="text-gray-500">{typeof item.createdBy === 'string' ? item.createdBy : item.createdBy.name}</span></p>
                             </div>
                             <div className="flex gap-2 mt-4">
-                                {userRole === "student" && (
+                                {userRole === "student" && user?._id && !item?.purchasedBy?.includes(user._id) && (
                                     <button
-                                        onClick={() => handleBuy(item._id)}
+                                        onClick={() => handleBuy(item)}
                                         className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-semibold shadow"
                                     >
                                         Buy Course
@@ -138,7 +181,10 @@ export const ContentList = ({
                     ))}
                 </div>
             )}
-            <ChatModal isOpen={chatOpen} onClose={() => setChatOpen(false)} teacherName={chatTeacher} />
+            {
+                user && <ChatModal isOpen={chatOpen} onClose={() => setChatOpen(false)} teacherName={chatTeacher} user={user} />
+
+            }
         </>
     );
 }

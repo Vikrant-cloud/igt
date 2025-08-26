@@ -4,23 +4,9 @@ import Layout from '@/components/Layouts/Layout';
 import { useReactQuery } from '@/utils/useReactQuery';
 import { getHomeContentList } from '@/api/auth';
 import { ContentList } from '@/components/content';
-import { useNavigate } from 'react-router';
-import { useEffect } from 'react';
 
 export default function Home() {
     const { user } = useAuth();
-    const navigate = useNavigate()
-    useEffect(() => {
-        if (user?.role === 'student') {
-            console.log("kkkkks");
-
-            navigate('/student/dashboard', { replace: true });
-        } else if (user?.role === 'teacher') {
-            navigate('/teacher/dashboard', { replace: true });
-        }
-        return
-    }, [user])
-
 
     const page = 1; // Example page number
     const limit = 10; // Example limit for pagination

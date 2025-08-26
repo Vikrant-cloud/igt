@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form"
 import type { SubmitHandler } from "react-hook-form"
 import { Link } from 'react-router';
 import AuthLayout from "@/components/Layouts/AuthLayout";
-import { useNavigate } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
@@ -18,7 +17,6 @@ type Inputs = {
 }
 
 const Login = () => {
-  const navigate = useNavigate()
   const { login } = useAuth();
   const [loading, setLoading] = useState(false)
   // Initialize form handling

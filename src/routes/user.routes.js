@@ -4,7 +4,8 @@ import {
     usersList,
     editUser,
     deleteUser,
-    approveUser
+    approveUser,
+    subscribedStudents
 } from '../controller/user.controller.js';
 
 import { verifyUser } from '../middlewares/verifyUser.js';
@@ -18,5 +19,6 @@ router.get('/', verifyUser, verifyAdmin, usersList);
 router.put('/:id', verifyUser, upload.single('profilePicture'), editUser);
 router.delete('/:id', verifyUser, verifyAdmin, deleteUser);
 router.post('/approve-request/:id', verifyUser, verifyAdmin, approveUser)
+router.post('/subscribed-students', verifyUser, subscribedStudents)
 
 export default router;

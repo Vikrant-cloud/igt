@@ -9,6 +9,6 @@ export function useReactQuery<TData = unknown>(
     return useQuery({
         queryKey,
         queryFn,
-        ...options,          // allows overriding staleTime, etc.
+        ...options,
     });
 }

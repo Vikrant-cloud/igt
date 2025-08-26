@@ -91,3 +91,29 @@ export const approveUser = asyncHandler(async (req, res) => {
 
     return res.status(200).json({ message: 'User approved successfully' });
 })
+
+export const subscribedStudents = asyncHandler(async (req, res) => {
+
+    const { courseId } = req.body;
+
+    if (!courseId) {
+        res.status(400);
+        throw new Error('Course ID is required');
+    }
+
+    const course = await Content.findById(courseId);
+    if (!course) {
+        res.status(404);
+        throw new Error('Course not found');
+    }
+
+    const students = await User.find({
+        _id: { $in: course.purchasedBy }
+    });
+
+    if (students.length === 0) {
+        return res.status(404).json({ message: 'No subscribed students found for this course' });
+    }
+
+    return res.status(200).json({ message: 'Subscribed students fetched successfully', students });
+});
