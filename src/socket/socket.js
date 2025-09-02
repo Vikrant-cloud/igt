@@ -4,8 +4,7 @@ import axios from 'axios';
 function initSocket(server) {
     const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
-    const API_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
-
+    const API_ENDPOINT = process.env.GEMINI_API
     const headers = {
         'Content-Type': 'application/json',
         'X-goog-api-key': GEMINI_API_KEY,
@@ -13,7 +12,7 @@ function initSocket(server) {
 
     const io = new Server(server, {
         cors: {
-            origin: "http://localhost:5173",
+            origin: process.env.FRONTEND_URL || 'http://localhost:5173',
             methods: ['GET', 'POST'],
             credentials: true,
         },
