@@ -5,7 +5,7 @@ import Content from '../models/content.model.js';
 
 // @desc   Create Stripe Checkout session for subscription
 // @route  POST /api/subscription/create-checkout-session
-// @access Public
+// @access Private
 export const createCheckoutSession = asyncHandler(async (req, res) => {
     const { courseId } = req.body;
 
@@ -20,7 +20,7 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
         line_items: [
             {
                 price_data: {
-                    currency: "usd",
+                    currency: "inr",
                     product_data: { name: course.title },
                     unit_amount: course.price * 100,
                 },
@@ -38,3 +38,4 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
 
     res.json({ url: session.url });
 });
+

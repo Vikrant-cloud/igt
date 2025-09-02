@@ -24,7 +24,7 @@ const MyCourses = lazy(() => import('@/pages/student/courses'));
 const CoursesPage = lazy(() => import('@/pages/admin/coursesPage'));
 const Subscription = lazy(() => import('@/pages/subscription'));
 const ApprovalPending = lazy(() => import('@/pages/approvalpending'));
-const Messages = lazy(() => import('@/pages/teacher/messages'));
+const CourseDetail = lazy(() => import('@/pages/teacher/courseDetail'));
 
 function App() {
   return (
@@ -101,13 +101,21 @@ function App() {
           }
         />
         <Route
+          path="/teacher/course/:id"
+          element={
+            <PrivateRoute>
+              <CourseDetail />
+            </PrivateRoute>
+          }
+        />
+        {/* <Route
           path="/teacher/messages"
           element={
             <PrivateRoute>
               <Messages />
             </PrivateRoute>
           }
-        />
+        /> */}
         <Route
           path="/profile/:id"
           element={

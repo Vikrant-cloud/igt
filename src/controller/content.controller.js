@@ -206,7 +206,6 @@ export const myCourses = asyncHandler(async (req, res) => {
                     as: 'createdBy',
                 },
             },
-            { $unwind: '$createdBy' },
             {
                 $project: {
                     title: 1,
@@ -215,6 +214,7 @@ export const myCourses = asyncHandler(async (req, res) => {
                     subject: 1,
                     createdAt: 1,
                     'createdBy.name': 1,
+                    purchasedBy: 1,
                 },
             },
             { $sort: { createdAt: -1 } },
@@ -233,4 +233,15 @@ export const myCourses = asyncHandler(async (req, res) => {
             pageSize: limit,
         },
     });
+});
+
+export const getContentById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const content = await Content.findById(id).populate('createdBy', 'name email').populate("purchasedBy", "name email");;
+    if (!content) {
+        res.status(404);
+        throw new Error('Content not found');
+    }
+    res.status(200).json(content);
 });

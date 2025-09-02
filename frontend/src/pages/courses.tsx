@@ -18,7 +18,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup"
 import Course from '@/components/Course/Course';
 import Pagination from '@/components/Pagination';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 
 const allowedTypes = [
     // Images
@@ -69,6 +69,7 @@ export type Content = {
 
 const ContentPage: React.FC = () => {
     const { user } = useAuth();
+    const navigate = useNavigate()
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [editContent, setEditContent] = useState<Content | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -228,7 +229,8 @@ const ContentPage: React.FC = () => {
                                 <Course item={item} />
                                 <div className="flex gap-2 mt-4">
                                     <button
-                                        onClick={() => handleEdit(item)}
+                                        //onClick={() => handleEdit(item)}
+                                        onClick={() => navigate(`/teacher/course/${item._id}`)}
                                         className="flex items-center gap-2 bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
                                     >
                                         <PencilSquareIcon className="w-5 h-5" />
