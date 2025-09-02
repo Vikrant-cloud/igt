@@ -7,7 +7,7 @@ import PublicRoute from '@/context/PublicRoutes';
 import Success from '@/pages/success';
 import Cancel from '@/pages/cancel';
 const DashboardStudent = lazy(() => import('@/pages/student/dashboard'));
-const DashboardTeacher = lazy(() => import('@/pages/teacher/dashboard'));
+// const DashboardTeacher = lazy(() => import('@/pages/teacher/dashboard'));
 const Home = lazy(() => import('@/pages/home'));
 const Students = lazy(() => import('@/pages/admin/students'));
 const Teachers = lazy(() => import('@/pages/admin/teachers'));

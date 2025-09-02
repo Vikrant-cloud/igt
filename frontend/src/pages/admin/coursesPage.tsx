@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useForm, } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { Dialog } from '@headlessui/react';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
+// import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
 import Layout from '@/components/Layouts/Layout';
 import api from '@/utils/axios';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,7 +15,7 @@ import Modal from '@/components/Modal';
 import Loading from '@/components/Loading';
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup"
-import Course from '@/components/Course/Course';
+// import Course from '@/components/Course/Course';
 
 const allowedTypes = [
     // Images
@@ -93,24 +93,24 @@ const CoursesPage: React.FC = () => {
         resolver: yupResolver(schema)
     });
 
-    const handleOpen = () => {
-        reset();
-        setIsOpen(true);
-        setIsEditMode(false);
-    };
+    // const handleOpen = () => {
+    //     reset();
+    //     setIsOpen(true);
+    //     setIsEditMode(false);
+    // };
 
-    const handleEdit = (item: Content) => {
-        setEditContent(item);
-        setIsEditMode(true);
-        setIsOpen(true);
-        reset({
-            title: item.title,
-            subject: item.subject,
-            description: item.description,
-            media: undefined,
-            price: item.price
-        });
-    };
+    // const handleEdit = (item: Content) => {
+    //     setEditContent(item);
+    //     setIsEditMode(true);
+    //     setIsOpen(true);
+    //     reset({
+    //         title: item.title,
+    //         subject: item.subject,
+    //         description: item.description,
+    //         media: undefined,
+    //         price: item.price
+    //     });
+    // };
 
     const handleDelete = async (id: string) => {
         try {

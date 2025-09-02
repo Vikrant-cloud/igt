@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
-import { HiOutlineHome, HiOutlineUsers, HiOutlineDocumentText, HiOutlineCreditCard } from 'react-icons/hi';
+import { HiOutlineHome, HiOutlineDocumentText, HiOutlineCreditCard } from 'react-icons/hi';
 
 export default function SideBar() {
   const { user } = useAuth();

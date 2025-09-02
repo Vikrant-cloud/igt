@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Content } from "@/pages/courses";
 import api from "@/utils/axios";
 import { useAuth } from "@/hooks/useAuth";

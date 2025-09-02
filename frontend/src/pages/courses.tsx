@@ -103,19 +103,19 @@ const ContentPage: React.FC = () => {
         setIsEditMode(false);
     };
 
-    const handleEdit = (item: Content) => {
-        setEditContent(item);
-        setIsEditMode(true);
-        setIsOpen(true);
-        reset({
-            title: item.title,
-            subject: item.subject,
-            description: item.description,
-            media: undefined,
-            price: item.price
-        });
-        setSelectedFiles([]);
-    };
+    // const handleEdit = (item: Content) => {
+    //     setEditContent(item);
+    //     setIsEditMode(true);
+    //     setIsOpen(true);
+    //     reset({
+    //         title: item.title,
+    //         subject: item.subject,
+    //         description: item.description,
+    //         media: undefined,
+    //         price: item.price
+    //     });
+    //     setSelectedFiles([]);
+    // };
 
     const handleDelete = async (id: string) => {
         try {
@@ -221,7 +221,7 @@ const ContentPage: React.FC = () => {
                     <p className="text-gray-500">No content added yet.</p>
                 ) : (
                     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-                        {data?.contents.map((item: Content, idx: number) => (
+                        {data?.contents.map((item: Content) => (
                             <div
                                 key={item._id}
                                 className="flex flex-col border border-gray-200 bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full group"
