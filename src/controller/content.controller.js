@@ -57,13 +57,14 @@ export const contentList = asyncHandler(async (req, res) => {
                     'createdBy.name': 1,
                     price: 1,
                     isApproved: 1,
+                    purchasedBy: 1,
                 },
             },
             { $sort: { createdAt: -1 } },
             { $skip: skip },
             { $limit: limit },
         ]),
-        Content.countDocuments(req.user.role === 'teacher' ? { createdBy: req.user.id } : { isApproved: true }),
+        Content.countDocuments(req.user.role === 'teacher' ? { createdBy: req.user.id } : req.user.role === 'student' ? { isApproved: true } : {}),
     ]);
 
     res.status(200).json({
@@ -159,7 +160,7 @@ export const homeContentList = asyncHandler(async (req, res) => {
             { $skip: skip },
             { $limit: limit },
         ]),
-        Content.countDocuments(),
+        Content.countDocuments(req.user.role === 'student' ? { isApproved: true } : {}),
     ]);
 
     res.status(200).json({
@@ -206,6 +207,7 @@ export const myCourses = asyncHandler(async (req, res) => {
                     as: 'createdBy',
                 },
             },
+            { $unwind: '$createdBy' },
             {
                 $project: {
                     title: 1,
@@ -215,6 +217,8 @@ export const myCourses = asyncHandler(async (req, res) => {
                     createdAt: 1,
                     'createdBy.name': 1,
                     purchasedBy: 1,
+                    price: 1,
+                    isApproved: 1,
                 },
             },
             { $sort: { createdAt: -1 } },

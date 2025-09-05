@@ -26,10 +26,10 @@ export default function AdminSideBar() {
                     <HiOutlineCreditCard size={20} />
                     Courses
                 </Link>
-                <Link to="/admin/stats" className={isActive('/stats')}>
+                {/* <Link to="/admin/stats" className={isActive('/stats')}>
                     <HiOutlineCreditCard size={20} />
                     Stats
-                </Link>
+                </Link> */}
             </nav>
         </aside>
     );

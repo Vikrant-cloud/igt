@@ -5,7 +5,7 @@ import Loading from '@/components/Loading';
 export default function PrivateRoute({ children }: { children: React.ReactNode }) {
     const { user, loading } = useAuth();
     const location = useLocation();
-    
+
     if (loading) {
         return <Loading />
     }
@@ -21,11 +21,20 @@ export default function PrivateRoute({ children }: { children: React.ReactNode }
         }
     }
     if (user.role === 'admin') {
-        return children
+        if (location.pathname.startsWith('/admin')) {
+            return children
+        }
+        return <Navigate to="/admin/dashboard" replace />
     } else if (user.role === 'student') {
-        return children
+        if (location.pathname.startsWith('/student')) {
+            return children
+        }
+        return <Navigate to="/student/dashboard" replace />
     } else if (user.role === 'teacher') {
-        return children
+        if (location.pathname.startsWith('/teacher')) {
+            return children
+        }
+        return <Navigate to="/teacher/dashboard" replace />
     }
 
     return children

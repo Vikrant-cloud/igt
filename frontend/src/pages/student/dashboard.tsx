@@ -1,6 +1,4 @@
-import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layouts/Layout';
-// import Chat from '@/components/Chat';
 import { useReactQuery } from '@/utils/useReactQuery';
 import { getHomeContentList } from '@/api/auth';
 import { ContentList } from '@/components/content';
@@ -9,10 +7,9 @@ import { useState } from 'react';
 import { useSearchParams } from 'react-router';
 
 export default function Dashboard() {
-  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
-  const limit = 10;
+  const limit = 3;
   const { data } = useReactQuery(
     ['homeContent', page, limit],
     () => getHomeContentList({ queryKey: ['homeContent', page, limit] }),
@@ -25,12 +22,10 @@ export default function Dashboard() {
   }
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-100">
-        <h1 className="text-4xl font-bold mb-4">Welcome to the Home Page</h1>
-        <p className="text-lg mb-6">Hello, {user?.name || 'Guest'}!</p>
-        <p className="text-lg mb-6">You are a {user?.role || 'Guest'}!</p>
+      <div className="min-h-screen bg-gray-100 mx-5 my-5">
+        <h1 className="text-4xl font-bold mb-10">Top Courses</h1>
         {/* <Chat /> */}
-        <ContentList data={data} userRole={user?.role} />
+        <ContentList data={data} />
         <Pagination
           total={data?.pagination?.total}
           pageSize={limit}

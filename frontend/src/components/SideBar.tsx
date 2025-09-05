@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
-import { HiOutlineHome, HiOutlineDocumentText, HiOutlineCreditCard } from 'react-icons/hi';
+import { HiOutlineHome, HiOutlineDocumentText } from 'react-icons/hi';
 
 export default function SideBar() {
   const { user } = useAuth();
@@ -25,18 +25,14 @@ export default function SideBar() {
           <HiOutlineDocumentText size={20} />
           My Courses
         </Link>
-        <Link to={checkRoute('messages')} className={isActive('/teacher/messages')}>
-          <HiOutlineDocumentText size={20} />
-          Messages
-        </Link>
-        {
+        {/* {
           user?.role === 'teacher' && (
             <Link to={checkRoute('earnings')} className={isActive('/earnings')}>
               <HiOutlineCreditCard size={20} />
               Earnings
             </Link>
           )
-        }
+        } */}
       </nav>
     </aside>
   );

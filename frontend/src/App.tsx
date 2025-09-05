@@ -7,24 +7,22 @@ import PublicRoute from '@/context/PublicRoutes';
 import Success from '@/pages/success';
 import Cancel from '@/pages/cancel';
 const DashboardStudent = lazy(() => import('@/pages/student/dashboard'));
-// const DashboardTeacher = lazy(() => import('@/pages/teacher/dashboard'));
+const DashboardTeacher = lazy(() => import('@/pages/teacher/dashboard'));
 const Home = lazy(() => import('@/pages/home'));
 const Students = lazy(() => import('@/pages/admin/students'));
 const Teachers = lazy(() => import('@/pages/admin/teachers'));
 const Login = lazy(() => import('@/pages/login'));
 const AdminLogin = lazy(() => import('@/pages/admin/login'))
 const Signup = lazy(() => import('@/pages/signup'));
-const Profile = lazy(() => import('@/pages/profile'));
 const NotFound = lazy(() => import('@/pages/notfound'));
 const ForgotPassword = lazy(() => import('@/pages/forgotpassword'));
 const ResetPassword = lazy(() => import('@/pages/resetPassword'));
-const Users = lazy(() => import('@/pages/users'));
 const Courses = lazy(() => import('@/pages/courses'));
 const MyCourses = lazy(() => import('@/pages/student/courses'));
 const CoursesPage = lazy(() => import('@/pages/admin/coursesPage'));
-const Subscription = lazy(() => import('@/pages/subscription'));
 const ApprovalPending = lazy(() => import('@/pages/approvalpending'));
 const CourseDetail = lazy(() => import('@/pages/teacher/courseDetail'));
+const UserDetail = lazy(() => import('@/pages/admin/userDetail'));
 
 function App() {
   return (
@@ -57,15 +55,41 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* Student Routes */}
         <Route
-          path="/"
+          path="/admin/student/:id"
           element={
             <PrivateRoute>
-              <Home />
+              <UserDetail />
             </PrivateRoute>
           }
         />
+        <Route
+          path="/admin/teacher/:id"
+          element={
+            <PrivateRoute>
+              <UserDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/courses"
+          element={
+            <PrivateRoute>
+              <CoursesPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/admin/course/:id"
+          element={
+            <PrivateRoute>
+              <CourseDetail />
+            </PrivateRoute>
+          }
+        />
+
+
+        {/* Student Routes */}
 
         <Route
           path="/student/dashboard"
@@ -83,12 +107,22 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/student/course/:id"
+          element={
+            <PrivateRoute>
+              <CourseDetail />
+            </PrivateRoute>
+          }
+        />
+
+
         {/* Teacher routes */}
         <Route
           path="/teacher/dashboard"
           element={
             <PrivateRoute>
-              <DashboardStudent />
+              <DashboardTeacher />
             </PrivateRoute>
           }
         />
@@ -108,54 +142,8 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* <Route
-          path="/teacher/messages"
-          element={
-            <PrivateRoute>
-              <Messages />
-            </PrivateRoute>
-          }
-        /> */}
-        <Route
-          path="/profile/:id"
-          element={
-            <PrivateRoute>
-              <Profile />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/users"
-          element={
-            <PrivateRoute>
-              <Users />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/courses"
-          element={
-            <PrivateRoute>
-              <Courses />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/admin/courses"
-          element={
-            <PrivateRoute>
-              <CoursesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/subscription"
-          element={
-            <PrivateRoute>
-              <Subscription />
-            </PrivateRoute>
-          }
-        />
+
+        {/* Common Private Routes */}
         <Route
           path="/success"
           element={
@@ -169,6 +157,14 @@ function App() {
           element={
             <PrivateRoute>
               <Cancel />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/approval-pending"
+          element={
+            <PrivateRoute>
+              <ApprovalPending />
             </PrivateRoute>
           }
         />
@@ -214,14 +210,7 @@ function App() {
             </PublicRoute>
           }
         />
-        <Route
-          path="/approval-pending"
-          element={
-            <PrivateRoute>
-              <ApprovalPending />
-            </PrivateRoute>
-          }
-        />
+
       </Routes>
     </BrowserRouter>
   );

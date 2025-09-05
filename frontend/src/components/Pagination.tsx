@@ -1,9 +1,9 @@
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid';
 
 type PaginationProps = {
-  total: number;    
-  pageSize: number;  
-  currentPage: number; 
+  total: number;
+  pageSize: number;
+  currentPage: number;
   onPageChange: (page: number) => void;
   siblingCount?: number;
 };
@@ -62,9 +62,9 @@ export default function Pagination({
   if (totalPages === 1) return null;
 
   const pages = getPageNumbers(totalPages, currentPage, siblingCount);
- 
+
   return (
-    <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+    <div className="flex items-center justify-between px-4 py-3 sm:px-6 mt-4">
       {/* Mobile view: Previous / Next */}
       <div className="flex flex-1 justify-between sm:hidden">
         <button

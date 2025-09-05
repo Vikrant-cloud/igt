@@ -19,8 +19,8 @@ export const createUser = (user: User) =>
 export const fetchCurrentUser = () =>
     api.get('/users/profile');
 
-export const fetchUsers = async () => {
-    const { data } = await api.get('/users');
+export const fetchUsers = async (page: number, limit: number, role: string) => {
+    const { data } = await api.get('/users?page=' + page + '&limit=' + limit + '&role=' + role);
     return data
 };
 
@@ -39,5 +39,17 @@ export const getHomeContentList = async ({ queryKey }: { queryKey: [string, numb
 export const getMyCourses = async ({ queryKey }: { queryKey: [string, number, number] }) => {
     const [_key, page, limit] = queryKey;
     const { data } = await api.get('/content/my-courses?page=' + page + '&limit=' + limit);
+    return data
+};
+
+
+
+export const getTeacherStats = async () => {
+    const { data } = await api.get('/users/stats');
+    return data
+};
+
+export const getAdminStats = async () => {
+    const { data } = await api.get('/users/admin-stats');
     return data
 };

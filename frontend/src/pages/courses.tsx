@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { SubmitHandler } from 'react-hook-form';
 import { Dialog } from '@headlessui/react';
-import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Layout from '@/components/Layouts/Layout';
 import api from '@/utils/axios';
@@ -18,7 +17,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup"
 import Course from '@/components/Course/Course';
 import Pagination from '@/components/Pagination';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useSearchParams } from 'react-router';
 
 const allowedTypes = [
     // Images
@@ -60,7 +59,7 @@ export type Content = {
     subject: string;
     description: string;
     media?: string[];
-    createdBy: string | createdByUser
+    createdBy: createdByUser
     createdAt: string
     price: string
     isApproved: boolean
@@ -69,7 +68,6 @@ export type Content = {
 
 const ContentPage: React.FC = () => {
     const { user } = useAuth();
-    const navigate = useNavigate()
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [editContent, setEditContent] = useState<Content | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
@@ -79,7 +77,7 @@ const ContentPage: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [page, setPage] = useState(1);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const limit = 10;
+    const limit = 3;
 
     const { data, refetch, isLoading } = useReactQuery(
         ['content', page, limit],
@@ -222,35 +220,35 @@ const ContentPage: React.FC = () => {
                 ) : (
                     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                         {data?.contents.map((item: Content) => (
-                            <div
-                                key={item._id}
-                                className="flex flex-col border border-gray-200 bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full group"
-                            >
-                                <Course item={item} />
-                                <div className="flex gap-2 mt-4">
-                                    <button
-                                        //onClick={() => handleEdit(item)}
-                                        onClick={() => navigate(`/teacher/course/${item._id}`)}
-                                        className="flex items-center gap-2 bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
-                                    >
-                                        <PencilSquareIcon className="w-5 h-5" />
-                                        Edit
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            setDeleteId(item._id);
-                                            setConfirmOpen(true);
-                                        }}
-                                        className="flex items-center gap-2 bg-gray-300 text-gray-900 hover:bg-gray-400 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
-                                    >
-                                        <TrashIcon className="w-5 h-5" />
-                                        Delete
-                                    </button>
-                                    {
-                                        !item.isApproved && <p>Approval pending</p>
-                                    }
-                                </div>
-                            </div>
+                            // <div
+                            //     key={item._id}
+                            //     className="flex flex-col border border-gray-200 bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 h-full group"
+                            // >
+                            //     <Course item={item} />
+                            //     <div className="flex gap-2 mt-4">
+                            //         <button
+                            //             onClick={() => handleEdit(item)}
+                            //             className="flex items-center gap-2 bg-blue-100 text-blue-800 hover:bg-blue-200 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
+                            //         >
+                            //             <PencilSquareIcon className="w-5 h-5" />
+                            //             Edit
+                            //         </button>
+                            //         <button
+                            //             onClick={() => {
+                            //                 setDeleteId(item._id);
+                            //                 setConfirmOpen(true);
+                            //             }}
+                            //             className="flex items-center gap-2 bg-gray-300 text-gray-900 hover:bg-gray-400 px-4 py-2 rounded-full font-semibold shadow transition-colors cursor-pointer"
+                            //         >
+                            //             <TrashIcon className="w-5 h-5" />
+                            //             Delete
+                            //         </button>
+                            //         {
+                            //             !item.isApproved && <p>Approval pending</p>
+                            //         }
+                            //     </div>
+                            // </div>
+                            <Course item={item} user={user} />
                         ))}
                     </div>
                 )}

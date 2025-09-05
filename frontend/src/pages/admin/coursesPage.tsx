@@ -1,59 +1,67 @@
-import React, { useState } from 'react';
-import { useForm, } from 'react-hook-form';
-import type { SubmitHandler } from 'react-hook-form';
-import { Dialog } from '@headlessui/react';
-// import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
-import Layout from '@/components/Layouts/Layout';
-import api from '@/utils/axios';
-import { useAuth } from '@/hooks/useAuth';
-import { useReactQuery } from '@/utils/useReactQuery';
-import { getContentList } from '@/api/auth';
-import { toast } from 'react-toastify';
-import Button from '@/components/Button';
-import InputBox from '@/components/InputBox';
-import Modal from '@/components/Modal';
-import Loading from '@/components/Loading';
+import React, { useState } from "react";
+import { useForm, type SubmitHandler } from "react-hook-form";
+import { Dialog } from "@headlessui/react";
+import Layout from "@/components/Layouts/Layout";
+import api from "@/utils/axios";
+import { useAuth } from "@/hooks/useAuth";
+import { useReactQuery } from "@/utils/useReactQuery";
+import { getContentList } from "@/api/auth";
+import { toast } from "react-toastify";
+import Button from "@/components/Button";
+import InputBox from "@/components/InputBox";
+import Modal from "@/components/Modal";
+import Loading from "@/components/Loading";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as Yup from "yup"
-// import Course from '@/components/Course/Course';
+import * as Yup from "yup";
+import {
+    PencilSquareIcon,
+    TrashIcon,
+    CheckCircleIcon,
+    UsersIcon as Users,
+    StarIcon as Star,
+    StarIcon as StarHalf,
+    MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import { Link, useSearchParams } from "react-router";
+import Pagination from "@/components/Pagination";
 
-const allowedTypes = [
-    // Images
-    "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp", "image/bmp", "image/tiff",
-    // PDF
-    "application/pdf",
-    // Videos
-    "video/mp4", "video/avi", "video/mov", "video/mkv", "video/webm", "video/quicktime", "video/x-msvideo"
+// random color util
+const colors = [
+    "#6366f1", // indigo
+    "#10b981", // emerald
+    "#ec4899", // pink
+    "#f59e0b", // amber
+    "#ef4444", // red
+    "#3b82f6", // blue
+    "#8b5cf6", // violet
+    "#14b8a6", // teal
 ];
+const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
 
 const schema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     subject: Yup.string().required("Subject is required"),
-    description: Yup.string().required("Subject is required"),
+    description: Yup.string().required("Description is required"),
+    price: Yup.string().required("Price is required"),
     media: Yup.mixed<FileList>()
-        .required("Please upload at least one file")
-        .test("fileType", "Some files have unsupported formats", (value) => {
-            if (!value || value.length === 0) return false;
-            return Array.from(value).every((file) => allowedTypes.includes(file.type));
+        .test("fileSize", "File is too large", (value) => {
+            if (!value || value.length === 0) return true; // not required
+            return value[0].size <= 10 * 1024 * 1024; // 10MB limit
         })
-        .test("fileSize", "Some files are too large (max 5MB)", (value) => {
-            if (!value || value.length === 0) return false;
-            return Array.from(value).every((file) => file.size <= 5 * 1024 * 1024);
-        }),
-    price: Yup.string().required("Price is required")
+        .nullable(),
 });
 
 type createdByUser = {
     _id: string;
     name: string;
-}
+};
 
 type FormValues = {
     title: string;
     subject: string;
     description: string;
     media: FileList;
-    price: string
+    price: string;
 };
 
 export type Content = {
@@ -62,26 +70,42 @@ export type Content = {
     subject: string;
     description: string;
     media?: string;
-    createdBy: createdByUser | string
-    createdAt: string
-    price: string
-    isApproved: boolean
+    createdBy: createdByUser | string;
+    createdAt: string;
+    price: string;
+    isApproved: boolean;
+    purchasedBy: string[];
 };
 
 const CoursesPage: React.FC = () => {
     const { user } = useAuth();
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // UI states
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const [editContent, setEditContent] = useState<Content | null>(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [confirmOpen, setConfirmOpen] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const page = 1;
-    const limit = 10;
+
+    // Pagination
+    const [page, setPage] = useState(1);
+    const limit = 3;
+
+    // 🔹 Filters
+    const [search, setSearch] = useState("");
+    const [status, setStatus] = useState("all");
+    const [subject, setSubject] = useState("all");
+    const [minPrice, setMinPrice] = useState("");
+    const [maxPrice, setMaxPrice] = useState("");
 
     const { data, refetch, isLoading } = useReactQuery(
-        ['content', page, limit],
-        () => getContentList({ queryKey: ['content', page, limit] }),
+        ["content", page, limit],
+        () =>
+            getContentList({
+                queryKey: ["content", page, limit],
+            })
     );
 
     const {
@@ -90,65 +114,55 @@ const CoursesPage: React.FC = () => {
         reset,
         formState: { errors },
     } = useForm<FormValues>({
-        resolver: yupResolver(schema)
+        resolver: yupResolver(schema),
     });
 
-    // const handleOpen = () => {
-    //     reset();
-    //     setIsOpen(true);
-    //     setIsEditMode(false);
-    // };
-
-    // const handleEdit = (item: Content) => {
-    //     setEditContent(item);
-    //     setIsEditMode(true);
-    //     setIsOpen(true);
-    //     reset({
-    //         title: item.title,
-    //         subject: item.subject,
-    //         description: item.description,
-    //         media: undefined,
-    //         price: item.price
-    //     });
-    // };
+    const handleEdit = (item: Content) => {
+        setEditContent(item);
+        setIsEditMode(true);
+        setIsOpen(true);
+        reset({
+            title: item.title,
+            subject: item.subject,
+            description: item.description,
+            media: undefined,
+            price: item.price,
+        });
+    };
 
     const handleDelete = async (id: string) => {
         try {
             await api.delete(`/content/${id}`);
             await refetch();
-            toast.success('Content deleted successfully');
+            toast.success("Course deleted successfully");
         } catch (err) {
-            console.error('Delete Error:', err);
+            console.error("Delete Error:", err);
         }
     };
 
     const onSubmit: SubmitHandler<FormValues> = async (data) => {
         setLoading(true);
         const formData = new FormData();
-        formData.append('title', data.title);
-        formData.append('subject', data.subject);
-        formData.append('description', data.description);
-        formData.append('price', data.price);
-        if (data.media || data.media[0]) {
-            if (typeof data.media === 'string') {
-                formData.append('media', data.media);
-            } else if (data.media instanceof FileList && data.media.length > 0) {
-                formData.append('media', data.media[0]);
-            }
+        formData.append("title", data.title);
+        formData.append("subject", data.subject);
+        formData.append("description", data.description);
+        formData.append("price", data.price);
+        if (data.media?.[0]) {
+            formData.append("media", data.media[0]);
         }
-        formData.append('createdBy', user?._id ?? '');
+        formData.append("createdBy", user?._id ?? "");
 
         try {
             if (isEditMode && editContent) {
                 await api.put(`/content/${editContent._id}`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                    headers: { "Content-Type": "multipart/form-data" },
                 });
-                toast.success('Content updated successfully');
+                toast.success("Course updated successfully");
             } else {
                 await api.post("/content/create-content", formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' },
+                    headers: { "Content-Type": "multipart/form-data" },
                 });
-                toast.success('Content created successfully');
+                toast.success("Course created successfully");
             }
             await refetch();
             reset();
@@ -156,131 +170,260 @@ const CoursesPage: React.FC = () => {
             setIsEditMode(false);
             setIsOpen(false);
         } catch (err: any) {
-            console.error('Upload Error:', err);
-            toast.error(err.response.data.message)
+            console.error("Upload Error:", err);
+            toast.error(err.response?.data?.message || "Something went wrong");
         } finally {
             setLoading(false);
         }
-
     };
 
     const approveCourse = async (id: string) => {
-        await api.post(`/content/approve/${id}`)
-            .then(() => {
-                toast.success('Course approved successfully');
-                refetch();
-            })
-            .catch((err) => {
-                console.error('Approval Error:', err);
-                toast.error('Failed to approve course');
-            });
-    }
+        try {
+            await api.post(`/content/approve/${id}`);
+            toast.success("Course approved successfully");
+            refetch();
+        } catch (err) {
+            toast.error("Failed to approve course");
+        }
+    };
 
-    if (isLoading) return (
-        <Layout>
-            <Loading />
-        </Layout>
+    const onPageChange = (newPage: number) => {
+        setPage(newPage);
+        const params = new URLSearchParams(searchParams);
+        params.set("page", newPage.toString());
+        setSearchParams(params);
+    };
+
+    // Collect unique subjects for filter dropdown
+    const subjects = Array.from(
+        new Set(data?.contents?.map((c: Content) => c.subject) || [])
     );
+
+    if (isLoading)
+        return (
+            <Layout>
+                <Loading />
+            </Layout>
+        );
 
     return (
         <Layout>
-            <div className="p-8 w-full px-4">
-                {/* <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">Content List</h1>
-                    <Button name={"Create Content"} onClick={handleOpen} type={true} />
-                </div> */}
-
-                <div className="min-h-screen mx-auto w-full bg-gradient-to-br from-indigo-50 flex flex-col items-center justify-start">
-                    <div className="w-full">
-                        <div className="rounded-2xl bg-gradient-to-r from-indigo-500 to-pink-400 px-6 py-5 shadow-lg flex items-center justify-center mb-6">
-                            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-wide text-center w-full">Courses List</h2>
-                        </div>
-                        <div className="overflow-x-auto rounded-2xl shadow-lg bg-white">
-                            <table className="min-w-full text-sm text-left text-gray-700">
-                                <thead className="bg-gray-100 text-xs uppercase text-gray-600">
-                                    <tr>
-                                        <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Name</th>
-                                        <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Subject</th>
-                                        <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Price</th>
-                                        <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Teacher</th>
-                                        <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Status</th>
-                                        <th className="px-4 sm:px-6 py-3 text-base sm:text-lg font-bold">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {data?.contents.map((item: Content) => (
-                                        <tr key={item._id} className="border-b hover:bg-gray-50 transition-colors">
-                                            <td className="px-4 sm:px-6 py-4">
-                                                {item.title}
-                                            </td>
-                                            <td className="px-4 sm:px-6 py-4 font-medium whitespace-nowrap">{item.subject}</td>
-                                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">{item.price}</td>
-                                            <td className="px-4 sm:px-6 py-4 whitespace-nowrap">{typeof item.createdBy === 'string' ? item.createdBy : item.createdBy.name}</td>
-                                            <td className="px-4 sm:px-6 py-4">
-                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${item.isApproved ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                                    {item.isApproved ? 'Approved' : 'Unapproved'}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 sm:px-6 py-4 space-x-2 whitespace-nowrap">
-                                                {!item.isApproved &&
-                                                    <Button name="Approve" onClick={() => { approveCourse(item._id) }} type={true} />
-                                                }
-
-                                                <button
-                                                    onClick={() => { }}
-                                                    className="px-3 py-1 text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition-colors cursor-pointer"
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    onClick={() => { }}
-                                                    className="px-3 py-1 text-red-600 border border-red-600 rounded hover:bg-red-50 transition-colors cursor-pointer"
-                                                >
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {data?.contents.length === 0 && (
-                                        <tr>
-                                            <td colSpan={6} className="px-4 sm:px-6 py-4 text-center text-gray-500">
-                                                No users found.
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+                {/* Header */}
+                <div className=" sm:flex-row items-center justify-between mb-6 gap-4">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-pink-500">
+                        Courses Management
+                    </h1>
                 </div>
 
-                {/* Content Modal */}
+                {/* 🔹 Filters */}
+                <div className="bg-white/90 shadow-md rounded-xl p-4 mb-8 flex flex-wrap gap-4 items-center">
+                    {/* Search */}
+                    <div className="relative flex-1 min-w-[200px]">
+                        <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search courses..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400"
+                        />
+                    </div>
 
+                    {/* Status Filter */}
+                    <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                        className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400"
+                    >
+                        <option value="all">All Status</option>
+                        <option value="approved">Approved</option>
+                        <option value="pending">Pending</option>
+                    </select>
+
+                    {/* Subject Filter */}
+                    <select
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400"
+                    >
+                        <option value="all">All Subjects</option>
+                        {subjects.map((subj, inx) => (
+                            <option key={inx} value={String(subj)}>
+                                {String(subj)}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Price Filters */}
+                    <input
+                        type="number"
+                        placeholder="Min Price"
+                        value={minPrice}
+                        onChange={(e) => setMinPrice(e.target.value)}
+                        className="px-3 py-2 border rounded-lg w-28 focus:ring-2 focus:ring-indigo-400"
+                    />
+                    <input
+                        type="number"
+                        placeholder="Max Price"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(e.target.value)}
+                        className="px-3 py-2 border rounded-lg w-28 focus:ring-2 focus:ring-indigo-400"
+                    />
+                </div>
+
+                {/* Cards Grid */}
+                {data?.contents?.length > 0 ? (
+                    <>
+                        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {data.contents.map((item: Content) => (
+                                <div
+                                    key={item._id}
+                                    className="group bg-white rounded-2xl shadow-md hover:shadow-2xl overflow-hidden transform transition-all duration-300 hover:scale-105 border border-gray-100 flex flex-col"
+                                >
+                                    {/* Banner */}
+                                    <Link
+                                        to={`/admin/course/${item._id}`}
+                                        style={{ backgroundColor: getRandomColor() }}
+                                        className="relative w-full h-40 flex items-center justify-center p-4 text-center"
+                                    >
+                                        <h4 className="text-white text-lg font-bold drop-shadow-lg line-clamp-2">
+                                            {item.title}
+                                        </h4>
+                                        {!item.isApproved && (
+                                            <span className="absolute top-3 right-3 bg-yellow-500 text-white text-[10px] font-semibold px-3 py-1 rounded-full shadow-md">
+                                                Pending
+                                            </span>
+                                        )}
+                                    </Link>
+
+                                    {/* Card body */}
+                                    <div className="p-5 flex flex-col flex-grow">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">
+                                                {item.subject}
+                                            </span>
+                                            <div className="flex items-center text-yellow-400 text-sm">
+                                                {Array(Math.floor(4.6))
+                                                    .fill(0)
+                                                    .map((_, i) => (
+                                                        <Star key={i} className="w-4 h-4 fill-current" />
+                                                    ))}
+                                                {4.6 % 1 > 0 && <StarHalf className="w-4 h-4 fill-current" />}
+                                                <span className="ml-1 text-gray-500 text-xs">(4.6)</span>
+                                            </div>
+                                        </div>
+
+                                        <h3 className="text-lg font-bold text-gray-900 mb-1 truncate">
+                                            {item.title}
+                                        </h3>
+                                        <p className="text-gray-500 text-sm mb-3">
+                                            by{" "}
+                                            {typeof item.createdBy === "string"
+                                                ? item.createdBy
+                                                : item.createdBy.name}
+                                        </p>
+
+                                        <div className="flex justify-between items-center mt-auto pt-4 border-t border-gray-100">
+                                            <span className="text-xl font-bold text-green-600">
+                                                ₹{item.price}
+                                            </span>
+                                            <div className="flex items-center text-gray-500 text-xs">
+                                                <Users className="w-4 h-4 mr-1" />
+                                                {item?.purchasedBy?.length} enrolled
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex flex-wrap gap-2 mt-4">
+                                            {!item.isApproved && (
+                                                <button
+                                                    onClick={() => approveCourse(item._id)}
+                                                    className="flex items-center gap-1 text-green-600 border border-green-600 px-3 py-1 rounded-lg hover:bg-green-50 transition text-xs"
+                                                >
+                                                    <CheckCircleIcon className="h-4 w-4" /> Approve
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleEdit(item)}
+                                                className="flex items-center gap-1 text-blue-600 border border-blue-600 px-3 py-1 rounded-lg hover:bg-blue-50 transition text-xs"
+                                            >
+                                                <PencilSquareIcon className="h-4 w-4" /> Edit
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setConfirmOpen(true);
+                                                    setDeleteId(item._id);
+                                                }}
+                                                className="flex items-center gap-1 text-red-600 border border-red-600 px-3 py-1 rounded-lg hover:bg-red-50 transition text-xs"
+                                            >
+                                                <TrashIcon className="h-4 w-4" /> Delete
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <Pagination
+                            total={data?.pagination?.total}
+                            pageSize={limit}
+                            currentPage={page}
+                            onPageChange={onPageChange}
+                        />
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                        <img
+                            src="https://illustrations.popsy.co/gray/course-empty.svg"
+                            alt="No courses"
+                            className="w-40 mb-4"
+                        />
+                        <p>No courses found. Start by adding one!</p>
+                    </div>
+                )}
+
+                {/* Modal */}
                 <Modal isOpen={isOpen} setIsOpen={setIsOpen} isEditMode={isEditMode}>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                         <InputBox title="title" register={register} errors={errors} />
                         <InputBox title="subject" register={register} errors={errors} />
-                        <InputBox title="description" register={register} errors={errors} inputType="textarea" />
-                        <InputBox title="price" register={register} errors={errors} type="number" />
+                        <InputBox
+                            title="description"
+                            register={register}
+                            errors={errors}
+                            inputType="textarea"
+                        />
+                        <InputBox title="price" register={register} errors={errors} />
                         <InputBox title="media" register={register} errors={errors} type="file" />
-
                         <div className="pt-2">
-                            <Button name={isEditMode ? "Update Content" : "Create Content"} loading={loading} />
+                            <Button
+                                name={isEditMode ? "Update Course" : "Create Course"}
+                                loading={loading}
+                            />
                         </div>
                     </form>
-                </Modal >
+                </Modal>
 
-                {/* Confirmation Modal */}
-                <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} className="relative z-50">
-                    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                {/* Delete Confirmation */}
+                <Dialog
+                    open={confirmOpen}
+                    onClose={() => setConfirmOpen(false)}
+                    className="relative z-50"
+                >
+                    <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
                     <div className="fixed inset-0 flex items-center justify-center p-4">
-                        <Dialog.Panel className="w-full max-w-sm bg-white rounded-lg p-6 shadow-xl relative">
-                            <Dialog.Title className="text-lg font-bold mb-4">Confirm Delete</Dialog.Title>
-                            <p className="mb-6 text-gray-700">Are you sure you want to delete this content? This action cannot be undone.</p>
-                            <div className="flex gap-4 justify-end">
+                        <Dialog.Panel className="w-full max-w-sm bg-white rounded-2xl p-6 shadow-xl">
+                            <Dialog.Title className="text-lg font-bold mb-2">
+                                Confirm Delete
+                            </Dialog.Title>
+                            <p className="mb-6 text-gray-600">
+                                Are you sure you want to delete this course? This action cannot
+                                be undone.
+                            </p>
+                            <div className="flex justify-end gap-3">
                                 <button
                                     onClick={() => setConfirmOpen(false)}
-                                    className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 text-gray-800"
+                                    className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700"
                                 >
                                     Cancel
                                 </button>
@@ -292,7 +435,7 @@ const CoursesPage: React.FC = () => {
                                             setDeleteId(null);
                                         }
                                     }}
-                                    className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+                                    className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white"
                                 >
                                     Delete
                                 </button>
