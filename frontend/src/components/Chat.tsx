@@ -10,7 +10,7 @@ const Chat = () => {
             setChat((prev) => [...prev, { text: data, from: 'server' }]);
         });
 
-        return () => { socket.off('receive_message'); }; // cleanup
+        return () => { socket.off('receive_message'); };
     }, []);
 
     const sendMessage = () => {

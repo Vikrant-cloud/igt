@@ -1,17 +1,29 @@
 import { motion } from "framer-motion";
-// import {
-//     UsersIcon,
-//     BookOpenIcon,
-//     BanknotesIcon,
-//     UserGroupIcon,
-// } from "@heroicons/react/24/outline";
 import {
     UsersIcon,
+    BookOpenIcon,
+    BanknotesIcon,
+    UserGroupIcon,
 } from "@heroicons/react/24/outline";
+
 import Layout from "@/components/Layouts/Layout";
 import { GraphCard } from "@/components/GraphCard";
 import { useReactQuery } from "@/utils/useReactQuery";
 import { getAdminStats } from "@/api/auth";
+
+const GetIcon = ({ title }: { title: string }) => {
+    console.log(title, "title");
+
+    if (title == "Total Students") {
+        return <UsersIcon className="h-7 w-7 text-white" />
+    } else if (title == "Total Teachers") {
+        return <UserGroupIcon className="h-7 w-7 text-white" />
+    } else if (title == "Total Courses") {
+        return <BookOpenIcon className="h-7 w-7 text-white" />
+    } else {
+        return <BanknotesIcon className="h-7 w-7 text-white" />
+    }
+}
 
 export default function AdminDashboard() {
     const { data } = useReactQuery(['admin-stats', 0, 0], getAdminStats)
@@ -36,7 +48,7 @@ export default function AdminDashboard() {
                             <div
                                 className={`p-4 rounded-2xl bg-gradient-to-r ${stat.color} shadow-lg`}
                             >
-                                <UsersIcon className="h-7 w-7 text-white" />
+                                <GetIcon title={stat.title} />
                             </div>
                             <div>
                                 <p className="text-gray-600 dark:text-gray-300 text-sm">

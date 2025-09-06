@@ -11,7 +11,7 @@ export default function PublicRoute({ children }: { children: React.ReactNode })
         } else if (user?.role === 'teacher') {
             return '/teacher/dashboard'
         }
-        return "/"
+        return "/login"
     }
 
     return !user ? children : <Navigate to={checkRoute()} replace />;

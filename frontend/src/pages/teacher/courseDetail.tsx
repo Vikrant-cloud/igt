@@ -1,7 +1,7 @@
 import Layout from "@/components/Layouts/Layout";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Dialog, Tab } from "@headlessui/react";
 import {
@@ -11,30 +11,98 @@ import {
   InformationCircleIcon,
   PencilSquareIcon,
   TrashIcon,
+  WifiIcon
 } from "@heroicons/react/24/outline";
 import api from "@/utils/axios";
+import { io } from "socket.io-client";
+import { useAuth } from "@/hooks/useAuth";
+
+// --- SOCKET.IO SETUP ---
+const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3001", {
+  withCredentials: true,
+});
 
 const CourseDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth()
   const { data, isLoading, error } = useQuery({
     queryKey: ["course", id],
     queryFn: () => api.get("/content/course/" + id).then((res) => res.data),
   });
 
+  // UI state
   const [chatOpen, setChatOpen] = useState(false);
+  const [userId, setUserId] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
+  // Chat & AI state
+  const [messages, setMessages] = useState<any[]>([]);
+  const [input, setInput] = useState("");
+  const [aiInput, setAiInput] = useState("");
+  const [aiMessages, setAiMessages] = useState<any[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // --- SOCKET CHAT & AI ---
+  useEffect(() => {
+    if (!id) return;
+    // Fetch chat history
+    api.get(`/messages/${id}`).then(res => setMessages(res.data));
+    socket.emit("join_room", id);
+
+    // Listen for new chat messages
+    socket.on("receive_chat", (msg) => setMessages(prev => [...prev, msg]));
+    // Listen for new AI messages
+    socket.on("receive_ai", (msg) => setAiMessages(prev => [...prev, msg]));
+
+    return () => {
+      socket.off("receive_chat");
+      socket.off("receive_ai");
+    };
+  }, [id]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, aiMessages]);
+
+  const handleSend = () => {
+    console.log(userId, "userId");
+
+    if (!input.trim()) return;
+    socket.emit("send_chat", {
+      roomId: id,
+      text: input,
+      sender: user?._id,
+      receiver: userId,
+      createdAt: new Date().toISOString(),
+    });
+    setInput("");
+  };
+
+  const handleSendAI = () => {
+    if (!aiInput.trim()) return;
+    setAiMessages(prev => [...prev, { text: aiInput, type: "user" }]);
+    setAiLoading(true);
+    socket.emit("send_ai", {
+      roomId: id,
+      text: aiInput,
+      sender: data?.createdBy?._id || "teacher",
+      createdAt: new Date().toISOString(),
+    });
+    setAiInput("");
+    setAiLoading(false);
+  };
+
+  // --- Edit/Delete handlers ---
   const handleEdit = () => {
     setEditOpen(true);
-    // You can add logic to open an edit modal and handle editing here
   };
 
   const handleDelete = async () => {
     setDeleteConfirm(false);
     try {
       await api.delete(`/content/course/${id}`);
-      // Optionally redirect or refetch
       window.location.href = "/teacher/courses";
     } catch (err) {
       alert("Delete failed");
@@ -119,6 +187,14 @@ const CourseDetail = () => {
               }>
                 <ChatBubbleBottomCenterTextIcon className="h-5 w-5" /> Chat
               </Tab>
+              <Tab className={({ selected }) =>
+                `flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg ${selected
+                  ? "bg-indigo-600 text-white"
+                  : "text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                }`
+              }>
+                <WifiIcon className="h-5 w-5" /> Ask AI
+              </Tab>
             </Tab.List>
 
             <Tab.Panels className="mt-6">
@@ -195,7 +271,11 @@ const CourseDetail = () => {
                         </div>
                       </div>
                       <button
-                        onClick={() => setChatOpen(true)}
+                        onClick={() => {
+                          setChatOpen(true)
+                          setUserId(user._id)
+                        }
+                        }
                         className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700"
                       >
                         Message
@@ -213,20 +293,75 @@ const CourseDetail = () => {
                   className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow h-80 flex flex-col"
                 >
                   <div className="flex-1 overflow-y-auto space-y-2">
-                    <div className="self-start bg-gray-200 dark:bg-gray-800 px-4 py-2 rounded-2xl">
-                      Hello Teacher 👋
-                    </div>
-                    <div className="self-end bg-indigo-600 text-white px-4 py-2 rounded-2xl">
-                      Hi! How can I help you?
-                    </div>
+                    {messages.map((msg, idx) => (
+                      <div
+                        key={msg._id || idx}
+                        className={`flex ${msg.sender === (data?.createdBy?._id || "teacher") ? "justify-end" : "justify-start"}`}
+                      >
+                        <div className={`rounded-2xl px-4 py-2 max-w-xs ${msg.sender === (data?.createdBy?._id || "teacher") ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800"}`}>
+                          <span className="block text-sm">{msg.text}</span>
+                          <span className="block text-xs text-gray-300 mt-1">{new Date(msg.createdAt).toLocaleTimeString()}</span>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
                   </div>
                   <div className="mt-4 flex gap-2">
                     <input
                       type="text"
+                      value={input}
+                      onChange={e => setInput(e.target.value)}
                       className="flex-1 rounded-full border px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                       placeholder="Type a message..."
+                      onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
                     />
-                    <button className="bg-indigo-600 text-white px-4 rounded-full">Send</button>
+                    <button
+                      className="bg-indigo-600 text-white px-4 rounded-full"
+                      onClick={handleSend}
+                    >
+                      Send
+                    </button>
+                  </div>
+                </motion.div>
+              </Tab.Panel>
+
+              {/* Ask AI */}
+              <Tab.Panel>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="bg-white dark:bg-gray-900 p-6 rounded-2xl shadow h-80 flex flex-col"
+                >
+                  <div className="flex-1 overflow-y-auto space-y-2">
+                    {aiMessages.map((msg, idx) => (
+                      <div
+                        key={msg._id || idx}
+                        className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
+                      >
+                        <div className={`rounded-2xl px-4 py-2 max-w-xs ${msg.type === "user" ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800"}`}>
+                          <span className="block text-sm">{msg.text}</span>
+                        </div>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <input
+                      type="text"
+                      value={aiInput}
+                      onChange={e => setAiInput(e.target.value)}
+                      className="flex-1 rounded-full border px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
+                      placeholder="Ask AI anything..."
+                      disabled={aiLoading}
+                      onKeyDown={e => { if (e.key === "Enter") handleSendAI(); }}
+                    />
+                    <button
+                      className="bg-indigo-600 text-white px-4 rounded-full"
+                      onClick={handleSendAI}
+                      disabled={aiLoading}
+                    >
+                      {aiLoading ? "Thinking..." : "Send"}
+                    </button>
                   </div>
                 </motion.div>
               </Tab.Panel>
@@ -247,20 +382,35 @@ const CourseDetail = () => {
               </Dialog.Title>
               <div className="mt-4 flex flex-col h-80">
                 <div className="flex-1 overflow-y-auto space-y-2">
-                  <div className="self-start bg-gray-200 dark:bg-gray-800 px-4 py-2 rounded-2xl">
-                    Hello Teacher 👋
-                  </div>
-                  <div className="self-end bg-indigo-600 text-white px-4 py-2 rounded-2xl">
-                    Hi! How can I help you?
-                  </div>
+                  {messages.map((msg, idx) => (
+                    <div
+                      key={msg._id || idx}
+                      className={`flex ${msg.receiver?._id == userId ? "justify-end" : "justify-start"}`}
+                    >
+                      <div className={`rounded-2xl px-4 py-2 max-w-xs ${msg.receiver?._id == userId ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800"}`}>
+                        <span className="block text-sm">{msg.text}</span>
+                        <span className="block text-xs text-gray-300 mt-1">{new Date(msg.createdAt).toLocaleTimeString()}</span>
+                      </div>
+
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
                 </div>
                 <div className="mt-4 flex gap-2">
                   <input
                     type="text"
+                    value={input}
+                    onChange={e => setInput(e.target.value)}
                     className="flex-1 rounded-full border px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
                     placeholder="Type a message..."
+                    onKeyDown={e => { if (e.key === "Enter") handleSend(); }}
                   />
-                  <button className="bg-indigo-600 text-white px-4 rounded-full">Send</button>
+                  <button
+                    className="bg-indigo-600 text-white px-4 rounded-full"
+                    onClick={() => handleSend()}
+                  >
+                    Send
+                  </button>
                 </div>
               </div>
               <div className="mt-4 flex justify-end">

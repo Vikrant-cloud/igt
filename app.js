@@ -9,6 +9,7 @@ import authRouter from './src/routes/auth.routes.js';
 import userRoutes from './src/routes/user.routes.js';
 import contentRoutes from './src/routes/content.routes.js';
 import paymentRoutes from './src/routes/payment.routes.js';
+import messageRoutes from './src/routes/message.route.js'
 import webhookRoute from './src/routes/webhook.js';
 import initSocket from './src/socket/socket.js';
 import { notFound, errorHandler } from './src/middlewares/errorMiddleware.js';
@@ -36,6 +37,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/users', userRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/subscription', paymentRoutes);
+app.use('/api/messages', messageRoutes);
 
 // 🌐 Serve Frontend (Vite build)
 serveFrontend(app);

@@ -1,6 +1,19 @@
-import express from 'express'
-import { verifyUser } from '../middlewares/verifyUser'
+import express from "express";
+import {
+  getCourseMessages,
+  sendMessage,
+  getPrivateChat,
+} from "../controller/message.controller.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.post('/', verifyUser, )
+// Course chat (teacher + all students)
+router.get("/:roomId", getCourseMessages);
+
+// Private teacher ↔ student chat
+router.get("/:roomId/:userId1/:userId2", getPrivateChat);
+
+// Send message
+router.post("/", sendMessage);
+
+export default router;
