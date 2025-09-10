@@ -11,6 +11,7 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
 
     // find course in DB
     const course = await Content.findById(courseId);
+
     if (!course) return res.status(404).json({ error: "Course not found" });
 
     // create checkout session
@@ -30,7 +31,7 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
         success_url: `${process.env.FRONTEND_URL}/success`,
         cancel_url: `${process.env.FRONTEND_URL}/cancel`,
         customer_email: req.user.email,
-        metadata: { courseId: toString(course._id), userId: req.user.id },
+        metadata: { courseId: course._id.toString(), userId: req.user.id },
     });
 
     // course.purchasedBy.push(req.user.id);
