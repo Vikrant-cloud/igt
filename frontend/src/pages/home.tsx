@@ -12,15 +12,17 @@ import { useReactQuery } from "@/utils/useReactQuery";
 import { getAdminStats } from "@/api/auth";
 
 const GetIcon = ({ title }: { title: string }) => {
-    console.log(title, "title");
 
     if (title == "Total Students") {
         return <UsersIcon className="h-7 w-7 text-white" />
-    } else if (title == "Total Teachers") {
+    }
+    if (title == "Total Teachers") {
         return <UserGroupIcon className="h-7 w-7 text-white" />
-    } else if (title == "Total Courses") {
+    }
+    if (title == "Total Courses") {
         return <BookOpenIcon className="h-7 w-7 text-white" />
-    } else {
+    }
+    if (title == "Total Transactions") {
         return <BanknotesIcon className="h-7 w-7 text-white" />
     }
 }
@@ -46,7 +48,7 @@ export default function AdminDashboard() {
                             className="rounded-2xl shadow-lg bg-white dark:bg-gray-900 p-6 flex items-center gap-4 hover:shadow-xl transition"
                         >
                             <div
-                                className={`p-4 rounded-2xl bg-gradient-to-r ${stat.color} shadow-lg`}
+                                className={`p-4 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 shadow-lg`}
                             >
                                 <GetIcon title={stat.title} />
                             </div>

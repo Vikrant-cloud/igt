@@ -241,11 +241,26 @@ export const myCourses = asyncHandler(async (req, res) => {
 
 export const getContentById = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    const userId = req.user?.id; // from auth middleware
 
-    const content = await Content.findById(id).populate('createdBy', 'name email').populate("purchasedBy", "name email");;
+    const content = await Content.findById(id)
+        .populate("createdBy", "name email")
+        .populate("purchasedBy", "name email");
+
     if (!content) {
         res.status(404);
-        throw new Error('Content not found');
+        throw new Error("Content not found");
     }
-    res.status(200).json(content);
+
+    // Convert to plain object so we can modify arrays
+    const contentObj = content.toObject();
+
+    if (userId && Array.isArray(contentObj.purchasedBy)) {
+        contentObj.purchasedBy = contentObj.purchasedBy.filter(
+            (u) => u._id.toString() !== userId.toString()
+        );
+    }
+
+    res.status(200).json(contentObj);
 });
+

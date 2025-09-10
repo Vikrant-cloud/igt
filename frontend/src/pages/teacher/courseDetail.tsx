@@ -385,9 +385,9 @@ const CourseDetail = () => {
                   {messages.map((msg, idx) => (
                     <div
                       key={msg._id || idx}
-                      className={`flex ${msg.receiver?._id == userId ? "justify-end" : "justify-start"}`}
+                      className={`flex ${msg.receiver?._id == userId ? "justify-end" : msg.sender?._id == userId ? "justify-start" : ""}`}
                     >
-                      <div className={`rounded-2xl px-4 py-2 max-w-xs ${msg.receiver?._id == userId ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-800"}`}>
+                      <div className={`rounded-2xl px-4 py-2 max-w-xs ${msg.receiver?._id == userId ? " bg-indigo-600 text-white" : "bg-gray-200 text-gray-800"}`}>
                         <span className="block text-sm">{msg.text}</span>
                         <span className="block text-xs text-gray-300 mt-1">{new Date(msg.createdAt).toLocaleTimeString()}</span>
                       </div>
