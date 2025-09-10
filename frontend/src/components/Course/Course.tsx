@@ -3,8 +3,11 @@ import { Link } from "react-router";
 import { Star, StarHalf, Users } from "lucide-react";
 import type { User } from "@/context/AuthContext";
 import api from "@/utils/axios";
+import Button from "../Button";
+import { useState } from "react";
 
 const Course = ({ item, user }: { item: Content, user: User | null }) => {
+    const [buttonLoading, setButtonLoading] = useState(false);
 
     const getRandomColor = () => {
         const letters = '0123456789ABCDEF';
@@ -16,10 +19,18 @@ const Course = ({ item, user }: { item: Content, user: User | null }) => {
     };
 
     const handleBuy = async (id: string) => {
-        const res = await api.post('/subscription/create-checkout-session', {
-            courseId: id
-        });
-        window.location.href = res.data.url;
+        setButtonLoading(true)
+        try {
+            const res = await api.post('/subscription/create-checkout-session', {
+                courseId: id
+            });
+            window.location.href = res.data.url;
+        } catch (error) {
+            setButtonLoading(false)
+        } finally {
+            setButtonLoading(false)
+        }
+
     };
 
     return (
@@ -53,9 +64,7 @@ const Course = ({ item, user }: { item: Content, user: User | null }) => {
                                     {item?.purchasedBy.length}
                                 </div>
                             </div>
-                            <button onClick={() => handleBuy(item._id)} className="bg-blue-600 text-white px-6 py-2 rounded-full shadow-md hover:bg-blue-700 transition-colors duration-300 transform hover:scale-105">
-                                Buy Now
-                            </button>
+                            <Button name="Buy Now" loading={buttonLoading} onClick={() => handleBuy(item._id)} />
                         </div>
 
                     ) :

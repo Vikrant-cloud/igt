@@ -23,6 +23,7 @@ const CoursesPage = lazy(() => import('@/pages/admin/coursesPage'));
 const ApprovalPending = lazy(() => import('@/pages/approvalpending'));
 const CourseDetail = lazy(() => import('@/pages/teacher/courseDetail'));
 const UserDetail = lazy(() => import('@/pages/admin/userDetail'));
+const LandingPage = lazy(() => import('@/pages/LandingPage'));
 
 function App() {
   return (
@@ -170,6 +171,14 @@ function App() {
         />
 
         {/* Public Routes */}
+        <Route
+          path="/"
+          element={
+            <PublicRoute>
+              <LandingPage />
+            </PublicRoute>
+          }
+        />
         <Route
           path="/admin/login"
           element={

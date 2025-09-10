@@ -29,12 +29,12 @@ export const createCheckoutSession = asyncHandler(async (req, res) => {
         ],
         success_url: `${process.env.FRONTEND_URL}/success`,
         cancel_url: `${process.env.FRONTEND_URL}/cancel`,
-        //customer_email: req.user.email,
-        // metadata: { courseId: course._id, userId: req.user.id },
+        customer_email: req.user.email,
+        metadata: { courseId: toString(course._id), userId: req.user.id },
     });
 
-    course.purchasedBy.push(req.user.id);
-    await course.save();
+    // course.purchasedBy.push(req.user.id);
+    // await course.save();
 
     res.json({ url: session.url });
 });
