@@ -34,9 +34,6 @@ router.post(
 
                 const { courseId, userId } = session.metadata;
 
-                console.log(`✅ Payment successful for user ${userId} for course ${courseId}`);
-
-
                 // update purchasedBy after successful payment
                 const course = await Content.findById(courseId);
                 if (course && !course.purchasedBy.includes(userId)) {

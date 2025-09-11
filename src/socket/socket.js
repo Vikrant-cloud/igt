@@ -19,12 +19,11 @@ function initSocket(server) {
     });
 
     io.on("connection", (socket) => {
-        console.log("✅ New client connected:", socket.id);
+        console.log("New client connected:", socket.id);
 
         // Join course room
         socket.on("join_room", (roomId) => {
             socket.join(roomId);
-            console.log(`📌 User joined room: ${roomId}`);
         });
 
         // Chat messages
@@ -63,13 +62,13 @@ function initSocket(server) {
 
                 socket.emit("receive_ai", aiMessage);
             } catch (err) {
-                console.error("❌ AI error:", err);
+                console.error("AI error:", err);
                 socket.emit("receive_ai", { text: "Error from AI", type: "ai" });
             }
         });
 
         socket.on("disconnect", () => {
-            console.log("❌ Client disconnected:", socket.id);
+            console.log("Client disconnected:", socket.id);
         });
     });
 

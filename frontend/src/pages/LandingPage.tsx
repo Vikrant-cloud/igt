@@ -14,9 +14,7 @@ export default function LandingPage() {
         </nav>
       </header>
 
-      {/* Hero Section */}
       <section className="flex-1 flex flex-col md:flex-row items-center justify-between px-8 md:px-16 lg:px-32 py-12 md:py-24">
-        {/* Left Content */}
         <motion.div
           initial={{ opacity: 0, x: -60 }}
           animate={{ opacity: 1, x: 0 }}
@@ -46,7 +44,6 @@ export default function LandingPage() {
           </div>
         </motion.div>
 
-        {/* Right Content / Illustration */}
         <motion.div
           initial={{ opacity: 0, x: 60 }}
           animate={{ opacity: 1, x: 0 }}
@@ -61,7 +58,6 @@ export default function LandingPage() {
         </motion.div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="px-8 md:px-16 lg:px-32 py-16 bg-white">
         <h3 className="text-3xl font-bold text-center mb-12 text-gray-800">
           Why Choose IGT Learning?

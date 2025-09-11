@@ -15,6 +15,4 @@ export default function PublicRoute({ children }: { children: React.ReactNode })
     }
 
     return !user ? children : <Navigate to={checkRoute()} replace />;
-}
-// This component checks if the user is authenticated.
-// If the user is not authenticated, it renders the children components.    
+}  

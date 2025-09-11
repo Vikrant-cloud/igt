@@ -87,21 +87,21 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 };
 
 //
-// 📌 Additional Indexes
+// Additional Indexes
 //
 
-// 🔍 Text Index on name
+//  Text Index on name
 userSchema.index({ name: 'text' });
 
-// 📦 Compound Index: email + isVerified
+//  Compound Index: email + isVerified
 userSchema.index({ email: 1, isVerified: -1 });
 
-// ✅ Partial Index: only for verified users
+//  Partial Index: only for verified users
 userSchema.index({ email: 1 }, {
     partialFilterExpression: { isVerified: true }
 });
 
-// 🟡 Sparse Index (optional fields)
+//  Sparse Index (optional fields)
 userSchema.index({ isActive: 1 }, { sparse: true });
 
 const User = mongoose.models.User || mongoose.model('User', userSchema);

@@ -93,7 +93,7 @@ const CoursesPage: React.FC = () => {
     const [page, setPage] = useState(1);
     const limit = 3;
 
-    // 🔹 Filters
+    // Filters
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("all");
     const [subject, setSubject] = useState("all");
@@ -194,7 +194,6 @@ const CoursesPage: React.FC = () => {
         setSearchParams(params);
     };
 
-    // Collect unique subjects for filter dropdown
     const subjects = Array.from(
         new Set(data?.contents?.map((c: Content) => c.subject) || [])
     );
@@ -216,7 +215,7 @@ const CoursesPage: React.FC = () => {
                     </h1>
                 </div>
 
-                {/* 🔹 Filters */}
+                {/* Filters */}
                 <div className="bg-white/90 shadow-md rounded-xl p-4 mb-8 flex flex-wrap gap-4 items-center">
                     {/* Search */}
                     <div className="relative flex-1 min-w-[200px]">

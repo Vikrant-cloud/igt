@@ -135,17 +135,14 @@ const ContentPage: React.FC = () => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files);
 
-            // ✅ Add new files to previous ones
             setSelectedFiles((prev) => [...prev, ...newFiles]);
 
-            // ✅ Update react-hook-form value (combine existing + new files)
             setValue("media", FileListWrapper([...selectedFiles, ...newFiles]));
         }
     };
 
     const removeFile = (index: number) => {
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-        // Update react-hook-form value
         const dt = new DataTransfer();
         selectedFiles.forEach((file, i) => {
             if (i !== index) dt.items.add(file);
@@ -161,7 +158,6 @@ const ContentPage: React.FC = () => {
         formData.append('description', data.description);
         formData.append('price', data.price);
 
-        // Multiple file upload
         selectedFiles.forEach(file => {
             formData.append('media', file);
         });

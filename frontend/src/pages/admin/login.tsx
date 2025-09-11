@@ -34,7 +34,7 @@ const Login = () => {
         } catch (error: any) {
             setLoading(false)
         } finally {
-            setLoading(false); // ✅ Loading reset in finally
+            setLoading(false);
         }
     };
     // const handleSuccess = async (response: CredentialResponse) => {

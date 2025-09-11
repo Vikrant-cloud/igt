@@ -21,10 +21,10 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// 🧾 Stripe Webhook - raw body must come before express.json()
+// Stripe Webhook
 app.use('/webhook', express.raw({ type: 'application/json' }), webhookRoute);
 
-// 🔧 Middleware
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
@@ -32,23 +32,23 @@ app.use(cors({
     credentials: true,
 }));
 
-// 🚦 API Routes
+// API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/subscription', paymentRoutes);
 app.use('/api/messages', messageRoutes);
 
-// 🌐 Serve Frontend (Vite build)
+// Serve Frontend (Vite build)
 serveFrontend(app);
 
-// ⚠️ Global Error Handlers
+// Global Error Handlers
 app.use(notFound);
 app.use(errorHandler);
 
-// 🔌 Initialize Socket.IO
+// Initialize Socket.IO
 initSocket(server);
 
-// 🚀 Start Server
+// Start Server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

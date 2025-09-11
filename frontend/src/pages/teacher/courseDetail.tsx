@@ -17,7 +17,6 @@ import api from "@/utils/axios";
 import { io } from "socket.io-client";
 import { useAuth } from "@/hooks/useAuth";
 
-// --- SOCKET.IO SETUP ---
 const socket = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:3001", {
   withCredentials: true,
 });
@@ -30,13 +29,11 @@ const CourseDetail = () => {
     queryFn: () => api.get("/content/course/" + id).then((res) => res.data),
   });
 
-  // UI state
   const [chatOpen, setChatOpen] = useState(false);
   const [userId, setUserId] = useState("");
   const [editOpen, setEditOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
-  // Chat & AI state
   const [messages, setMessages] = useState<any[]>([]);
   const [input, setInput] = useState("");
   const [aiInput, setAiInput] = useState("");
@@ -44,16 +41,13 @@ const CourseDetail = () => {
   const [aiLoading, setAiLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // --- SOCKET CHAT & AI ---
   useEffect(() => {
     if (!id) return;
-    // Fetch chat history
     api.get(`/messages/${id}`).then(res => setMessages(res.data));
     socket.emit("join_room", id);
 
-    // Listen for new chat messages
     socket.on("receive_chat", (msg) => setMessages(prev => [...prev, msg]));
-    // Listen for new AI messages
+
     socket.on("receive_ai", (msg) => setAiMessages(prev => [...prev, msg]));
 
     return () => {
@@ -94,7 +88,6 @@ const CourseDetail = () => {
     setAiLoading(false);
   };
 
-  // --- Edit/Delete handlers ---
   const handleEdit = () => {
     setEditOpen(true);
   };
@@ -116,7 +109,7 @@ const CourseDetail = () => {
   return (
     <Layout>
       <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:to-gray-950">
-        {/* Hero */}
+        
         <div className="relative w-full h-72 md:h-96">
           {data.media?.[0]?.endsWith(".mp4") ? (
             <video className="h-full w-full object-cover" src={data.media[0]} autoPlay muted loop />
@@ -132,7 +125,7 @@ const CourseDetail = () => {
               {data.title}
             </motion.h1>
           </div>
-          {/* Edit & Delete Buttons */}
+         
           <div className="absolute top-4 right-4 flex gap-2 z-10">
             <button
               onClick={handleEdit}
@@ -151,7 +144,7 @@ const CourseDetail = () => {
           </div>
         </div>
 
-        {/* Tabs */}
+        
         <div className="max-w-6xl mx-auto px-4 py-10">
           <Tab.Group>
             <Tab.List className="flex space-x-4 rounded-xl bg-gray-100 dark:bg-gray-800 p-2">
@@ -369,12 +362,12 @@ const CourseDetail = () => {
           </Tab.Group>
         </div>
 
-        {/* 🔹 Chat Modal */}
+        
         <Dialog open={chatOpen} onClose={() => setChatOpen(false)} className="relative z-50">
-          {/* Overlay */}
+          
           <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
 
-          {/* Modal content */}
+          
           <div className="fixed inset-0 flex items-center justify-center p-4">
             <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl">
               <Dialog.Title className="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -425,7 +418,7 @@ const CourseDetail = () => {
           </div>
         </Dialog>
 
-        {/* Edit Modal (stub, expand as needed) */}
+        
         <Dialog open={editOpen} onClose={() => setEditOpen(false)} className="relative z-50">
           <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
           <div className="fixed inset-0 flex items-center justify-center p-4">
@@ -449,7 +442,7 @@ const CourseDetail = () => {
           </div>
         </Dialog>
 
-        {/* Delete Confirmation Modal */}
+        
         <Dialog open={deleteConfirm} onClose={() => setDeleteConfirm(false)} className="relative z-50">
           <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
           <div className="fixed inset-0 flex items-center justify-center p-4">

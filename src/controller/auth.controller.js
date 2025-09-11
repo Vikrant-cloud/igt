@@ -6,14 +6,12 @@ import { OAuth2Client } from "google-auth-library";
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-// 🔐 Generate JWT token
 const generateToken = (userId, userRole) => {
     return jwt.sign({ id: userId, role: userRole }, process.env.JWT_SECRET, {
         expiresIn: '1d',
     });
 };
 
-// 🟢 Login User
 export const loginUser = asyncHandler(async (req, res) => {
     const userExist = await User.findOne({
         email: req.body.email,
@@ -21,12 +19,12 @@ export const loginUser = asyncHandler(async (req, res) => {
     }).select('+password');
 
     if (!userExist) {
-        res.status(401); // Unauthorized
+        res.status(401); 
         throw new Error('No user found!');
     }
 
     if (!(await userExist.comparePassword(req.body.password))) {
-        res.status(401); // Unauthorized
+        res.status(401); 
         throw new Error('Incorrect password!');
     }
 
@@ -34,7 +32,7 @@ export const loginUser = asyncHandler(async (req, res) => {
 
     res.cookie('token', token, {
         httpOnly: false,
-        secure: false, // only works on HTTPS (Vercel is fine)
+        secure: false,
         sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
         maxAge: 24 * 60 * 60 * 1000, // 1 day
     });
@@ -46,11 +44,11 @@ export const loginUser = asyncHandler(async (req, res) => {
     });
 });
 
-// 🟢 Register/Create User
+// Register/Create User
 export const createUser = asyncHandler(async (req, res) => {
     const userExist = await User.findOne({ email: req.body.email });
     if (userExist) {
-        res.status(409); // Conflict
+        res.status(409); 
         throw new Error('User already exists');
     }
 
@@ -59,7 +57,7 @@ export const createUser = asyncHandler(async (req, res) => {
     res.status(201).json({ message: 'User created successfully' });
 });
 
-// 🔴 Logout User
+// Logout User
 export const logoutUser = asyncHandler(async (req, res) => {
     res.clearCookie('token', {
         httpOnly: false,
@@ -70,7 +68,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
     res.status(200).json({ message: 'User logged out successfully' });
 });
 
-// 🔁 Forgot Password (Send Reset Email)
+// Forgot Password (Send Reset Email)
 export const forgotPassword = asyncHandler(async (req, res) => {
     const { email } = req.body;
     const user = await User.findOne({ email });
@@ -97,7 +95,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     }
 });
 
-// 🔁 Reset Password
+// Reset Password
 export const resetPassword = asyncHandler(async (req, res) => {
     const { token, newPassword } = req.body;
 
@@ -125,7 +123,7 @@ export const resetPassword = asyncHandler(async (req, res) => {
     }
 });
 
-// 🟢 Google Login
+// Google Login
 export const googleLogin = asyncHandler(async (req, res) => {
     const { token } = req.body;
 
